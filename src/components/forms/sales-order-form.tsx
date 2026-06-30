@@ -3,19 +3,36 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Save, Trash2 } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { createSalesOrderAction } from "@/app/sales/actions";
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/input";
-import { demoCustomers, demoProducts } from "@/lib/demo-data";
 import { formatMoney } from "@/lib/utils";
 import { salesOrderSchema, type SalesOrderInput } from "@/lib/validations/sales";
 
-export function SalesOrderForm() {
+type SalesFormCustomer = {
+  id: string;
+  name: string;
+};
+
+type SalesFormProduct = {
+  id: string;
+  name: string;
+  salePrice: number;
+  vatRate: number;
+  unit: string;
+  stockQuantity: number;
+};
+
+export function SalesOrderForm({ customers, products }: { customers: SalesFormCustomer[]; products: SalesFormProduct[] }) {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
     control,
     watch,
+    setValue,
     formState: { errors, isSubmitting }
   } = useForm<SalesOrderInput>({
     resolver: zodResolver(salesOrderSchema),
@@ -36,9 +53,16 @@ export function SalesOrderForm() {
   }, 0);
   const grandTotal = subtotal - discount + vatTotal;
 
-  function onSubmit(data: SalesOrderInput) {
-    console.log("sales order form", data);
-    toast.success("Satis siparisi demo olarak dogrulandi");
+  async function onSubmit(data: SalesOrderInput) {
+    try {
+      const result = await createSalesOrderAction(data);
+      toast.success("Satis siparisi kaydedildi");
+      router.push(`/sales/${result.id}`);
+      router.refresh();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Satis siparisi kaydedilemedi. Alanlari ve stok durumunu kontrol edin.";
+      toast.error(message);
+    }
   }
 
   return (
@@ -46,7 +70,7 @@ export function SalesOrderForm() {
       <section className="grid gap-4 rounded-lg border border-border bg-white p-5 shadow-sm lg:grid-cols-2">
         <Select label="Musteri" {...register("customerId")} error={errors.customerId?.message}>
           <option value="">Musteri secin</option>
-          {demoCustomers.map((customer) => (
+          {customers.map((customer) => (
             <option key={customer.id} value={customer.id}>
               {customer.name}
             </option>
@@ -68,27 +92,39 @@ export function SalesOrderForm() {
           </Button>
         </div>
         <div className="mt-4 grid gap-3">
-          {fields.map((field, index) => (
+          {fields.map((field, index) => {
+            const productRegistration = register(`items.${index}.productId`, {
+              onChange: (event) => {
+                const product = products.find((item) => item.id === event.target.value);
+                if (!product) return;
+
+                setValue(`items.${index}.unitPrice`, product.salePrice, { shouldDirty: true, shouldValidate: true });
+                setValue(`items.${index}.vatRate`, product.vatRate, { shouldDirty: true, shouldValidate: true });
+              }
+            });
+
+            return (
             <div key={field.id} className="grid gap-3 rounded-md border border-border p-3 lg:grid-cols-[1.5fr_0.7fr_0.8fr_0.7fr_0.7fr_auto]">
-              <Select label="Urun" {...register(`items.${index}.productId`)}>
+              <Select label="Urun" {...productRegistration} error={errors.items?.[index]?.productId?.message}>
                 <option value="">Urun secin</option>
-                {demoProducts.map((product) => (
+                {products.map((product) => (
                   <option key={product.id} value={product.id}>
-                    {product.name}
+                    {product.name} ({product.stockQuantity} {product.unit})
                   </option>
                 ))}
               </Select>
-              <Input label="Miktar" type="number" step="0.01" {...register(`items.${index}.quantity`)} />
-              <Input label="Birim fiyat" type="number" step="0.01" {...register(`items.${index}.unitPrice`)} />
-              <Input label="KDV" type="number" step="0.01" {...register(`items.${index}.vatRate`)} />
-              <Input label="Indirim" type="number" step="0.01" {...register(`items.${index}.discount`)} />
+              <Input label="Miktar" type="number" step="0.01" {...register(`items.${index}.quantity`)} error={errors.items?.[index]?.quantity?.message} />
+              <Input label="Birim fiyat" type="number" step="0.01" {...register(`items.${index}.unitPrice`)} error={errors.items?.[index]?.unitPrice?.message} />
+              <Input label="KDV" type="number" step="0.01" {...register(`items.${index}.vatRate`)} error={errors.items?.[index]?.vatRate?.message} />
+              <Input label="Indirim" type="number" step="0.01" {...register(`items.${index}.discount`)} error={errors.items?.[index]?.discount?.message} />
               <div className="flex items-end">
                 <Button type="button" variant="secondary" className="size-10 p-0" onClick={() => remove(index)} aria-label="Kalemi sil">
                   <Trash2 className="size-4" />
                 </Button>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
         {errors.items?.message ? <p className="mt-2 text-sm font-medium text-danger">{errors.items.message}</p> : null}
       </section>

@@ -1,4 +1,4 @@
-import { Prisma, OrderStatus, StockMovementType } from "@prisma/client";
+import { InvoiceType, Prisma, OrderStatus, StockMovementType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { SalesOrderInput } from "@/lib/validations/sales";
 
@@ -125,6 +125,40 @@ export async function cancelSalesOrder(id: string) {
     return tx.salesOrder.update({
       where: { id },
       data: { status: OrderStatus.CANCELLED, stockPosted: false }
+    });
+  });
+}
+
+export async function createSalesInvoice(id: string) {
+  return prisma.$transaction(async (tx) => {
+    const order = await tx.salesOrder.findUnique({
+      where: { id },
+      include: { invoice: true }
+    });
+    if (!order) throw new Error("Satis siparisi bulunamadi");
+    if (order.invoice) return order.invoice;
+    if (order.status === OrderStatus.CANCELLED) throw new Error("Iptal edilen satis faturalanamaz");
+    if (!order.stockPosted) throw new Error("Fatura olusturmadan once satisi onaylayin");
+
+    const setting = await tx.companySetting.findFirst();
+    const prefix = setting?.invoicePrefix ?? "SLS";
+    const year = new Date().getFullYear();
+    const invoiceCount = await tx.invoice.count({
+      where: { invoiceNumber: { startsWith: `${prefix}-${year}-` } }
+    });
+
+    return tx.invoice.create({
+      data: {
+        invoiceNumber: `${prefix}-${year}-${String(invoiceCount + 1).padStart(4, "0")}`,
+        type: InvoiceType.SALES,
+        customerId: order.customerId,
+        salesOrderId: order.id,
+        dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+        subtotal: order.subtotal,
+        vatTotal: order.vatTotal,
+        discount: order.discount,
+        grandTotal: order.grandTotal
+      }
     });
   });
 }
