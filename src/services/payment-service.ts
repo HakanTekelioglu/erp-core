@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { PaymentInput } from "@/lib/validations/payment";
-import { InvoiceStatus } from "@prisma/client";
+import { InvoiceStatus, Prisma } from "@prisma/client";
 
 export async function listPayments() {
   return prisma.payment.findMany({
@@ -11,31 +11,41 @@ export async function listPayments() {
 
 export async function createPayment(input: PaymentInput, userId?: string) {
   return prisma.$transaction(async (tx) => {
-    const invoice = await tx.invoice.findUnique({ where: { id: input.invoiceId } });
+    const invoice = await tx.invoice.findUnique({
+      where: { id: input.invoiceId },
+      include: { payments: true }
+    });
     if (!invoice) throw new Error("Fatura bulunamadi");
+    if (invoice.status === InvoiceStatus.CANCELLED) throw new Error("Iptal edilen faturaya odeme girilemez");
+
+    const amount = new Prisma.Decimal(input.amount);
+    const paidBefore = invoice.payments.reduce((sum, item) => sum.add(item.amount), invoice.grandTotal.mul(0));
+    const nextPaidTotal = paidBefore.add(amount);
+
+    if (nextPaidTotal.greaterThan(invoice.grandTotal)) {
+      throw new Error("Odeme tutari fatura kalan tutarini asamaz");
+    }
 
     const payment = await tx.payment.create({
       data: {
         invoiceId: input.invoiceId,
         userId,
-        amount: input.amount,
+        amount,
         method: input.method,
         paidAt: input.paidAt,
         note: input.note
       }
     });
 
-    const payments = await tx.payment.findMany({ where: { invoiceId: input.invoiceId } });
-    const paidTotal = payments.reduce((sum, item) => sum.add(item.amount), invoice.grandTotal.mul(0));
-    const status = paidTotal.greaterThanOrEqualTo(invoice.grandTotal)
+    const status = nextPaidTotal.greaterThanOrEqualTo(invoice.grandTotal)
       ? InvoiceStatus.PAID
-      : paidTotal.greaterThan(0)
+      : nextPaidTotal.greaterThan(0)
         ? InvoiceStatus.PARTIALLY_PAID
         : InvoiceStatus.UNPAID;
 
     await tx.invoice.update({
       where: { id: input.invoiceId },
-      data: { paidTotal, status }
+      data: { paidTotal: nextPaidTotal, status }
     });
 
     return payment;
