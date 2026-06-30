@@ -18,18 +18,18 @@ function formatPaymentMethod(method: string) {
 export default async function PaymentsPage() {
   const [invoices, payments] = await Promise.all([listInvoices(), listPayments()]);
   const payableInvoices = invoices
-    .filter((invoice) => invoice.status !== "PAID" && invoice.status !== "CANCELLED")
+    .filter((invoice) => invoice.type === "PURCHASE" && invoice.status !== "PAID" && invoice.status !== "CANCELLED")
     .map((invoice) => ({
       id: invoice.id,
       invoiceNumber: invoice.invoiceNumber,
-      party: invoice.customer?.name ?? invoice.supplier?.companyName ?? "-",
+      party: invoice.supplier?.companyName ?? "-",
       remaining: Number(invoice.grandTotal.sub(invoice.paidTotal))
     }))
     .filter((invoice) => invoice.remaining > 0);
   const paymentRows = payments.map((payment) => ({
     id: payment.id,
     invoiceNumber: payment.invoice.invoiceNumber,
-    party: payment.invoice.customer?.name ?? payment.invoice.supplier?.companyName ?? "-",
+    party: payment.invoice.supplier?.companyName ?? "-",
     date: formatDate(payment.paidAt),
     method: formatPaymentMethod(payment.method),
     amount: Number(payment.amount)
@@ -37,7 +37,7 @@ export default async function PaymentsPage() {
 
   return (
     <AppShell>
-      <PageHeader title="Odeme Yonetimi" description="Faturalara tam veya parcali odeme kaydi girin; fatura durumu odemelere gore guncellenir." />
+      <PageHeader title="Odeme Yonetimi" description="Satin alma faturalarina tam veya parcali odeme kaydi girin; fatura durumu odemelere gore guncellenir." />
       <div className="grid gap-4 p-4 xl:grid-cols-[380px_1fr]">
         <PaymentForm invoices={payableInvoices} />
         <PaymentsTable rows={paymentRows} />

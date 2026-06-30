@@ -12,6 +12,9 @@ export async function createPurchaseOrderAction(input: PurchaseOrderInput) {
 
   revalidatePath("/purchases");
   revalidatePath("/invoices");
+  revalidatePath("/expenses");
+  revalidatePath("/dashboard");
+  revalidatePath("/reports");
 
   return { id: order.id };
 }
@@ -21,6 +24,9 @@ export async function receivePurchaseOrderAction(id: string) {
 
   revalidatePath("/purchases");
   revalidatePath(`/purchases/${id}`);
+  revalidatePath("/expenses");
+  revalidatePath("/dashboard");
+  revalidatePath("/reports");
   revalidatePath("/stock");
   revalidatePath("/stock/movements");
 }
@@ -30,6 +36,10 @@ export async function cancelPurchaseOrderAction(id: string) {
 
   revalidatePath("/purchases");
   revalidatePath(`/purchases/${id}`);
+  revalidatePath("/invoices");
+  revalidatePath("/expenses");
+  revalidatePath("/dashboard");
+  revalidatePath("/reports");
   revalidatePath("/stock");
   revalidatePath("/stock/movements");
 }
@@ -40,6 +50,9 @@ export async function createPurchaseInvoiceAction(id: string) {
   revalidatePath("/purchases");
   revalidatePath(`/purchases/${id}`);
   revalidatePath("/invoices");
+  revalidatePath("/expenses");
+  revalidatePath("/dashboard");
+  revalidatePath("/reports");
 
   return { id: invoice.id };
 }

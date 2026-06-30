@@ -29,7 +29,7 @@ export const navigationItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: allRoles },
   { label: "Urunler", href: "/products", icon: Package, roles: ["ADMIN", "MANAGER", "WAREHOUSE", "SALES"] },
   { label: "Kategoriler", href: "/categories", icon: Tags, roles: ["ADMIN", "MANAGER", "WAREHOUSE"] },
-  { label: "Stok", href: "/stock", icon: Boxes, roles: ["ADMIN", "MANAGER", "WAREHOUSE"] },
+  { label: "Stok", href: "/stock", icon: Boxes, roles: ["ADMIN", "MANAGER", "WAREHOUSE", "ACCOUNTING"] },
   { label: "Musteriler", href: "/customers", icon: Users, roles: ["ADMIN", "MANAGER", "SALES", "ACCOUNTING"] },
   { label: "Tedarikciler", href: "/suppliers", icon: Truck, roles: ["ADMIN", "MANAGER", "WAREHOUSE", "ACCOUNTING"] },
   { label: "Satis", href: "/sales", icon: ShoppingCart, roles: ["ADMIN", "MANAGER", "SALES"] },

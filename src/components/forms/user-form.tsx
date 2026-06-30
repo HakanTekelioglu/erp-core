@@ -26,7 +26,6 @@ export function UserForm() {
       await createUserAction(data);
       toast.success("Kullanici kaydedildi");
       router.push("/users");
-      router.refresh();
     } catch {
       toast.error("Kullanici kaydedilemedi. E-posta daha once kullanilmis olabilir.");
     }

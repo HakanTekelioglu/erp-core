@@ -26,7 +26,6 @@ export function CustomerForm() {
       await createCustomerAction(data);
       toast.success("Musteri kaydedildi");
       router.push("/customers");
-      router.refresh();
     } catch {
       toast.error("Musteri kaydedilemedi. Alanlari kontrol edin.");
     }

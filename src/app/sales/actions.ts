@@ -15,6 +15,9 @@ export async function createSalesOrderAction(input: SalesOrderInput) {
   }
 
   revalidatePath("/sales");
+  revalidatePath("/invoices");
+  revalidatePath("/dashboard");
+  revalidatePath("/reports");
   revalidatePath("/stock");
   revalidatePath("/stock/movements");
 
@@ -26,6 +29,9 @@ export async function approveSalesOrderAction(id: string) {
 
   revalidatePath("/sales");
   revalidatePath(`/sales/${id}`);
+  revalidatePath("/invoices");
+  revalidatePath("/dashboard");
+  revalidatePath("/reports");
   revalidatePath("/stock");
   revalidatePath("/stock/movements");
 }
@@ -35,6 +41,9 @@ export async function cancelSalesOrderAction(id: string) {
 
   revalidatePath("/sales");
   revalidatePath(`/sales/${id}`);
+  revalidatePath("/invoices");
+  revalidatePath("/dashboard");
+  revalidatePath("/reports");
   revalidatePath("/stock");
   revalidatePath("/stock/movements");
 }
@@ -45,6 +54,8 @@ export async function createSalesInvoiceAction(id: string) {
   revalidatePath("/sales");
   revalidatePath(`/sales/${id}`);
   revalidatePath("/invoices");
+  revalidatePath("/dashboard");
+  revalidatePath("/reports");
 
   return { id: invoice.id };
 }

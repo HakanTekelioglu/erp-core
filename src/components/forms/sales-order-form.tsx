@@ -58,7 +58,6 @@ export function SalesOrderForm({ customers, products }: { customers: SalesFormCu
       const result = await createSalesOrderAction(data);
       toast.success("Satis siparisi kaydedildi");
       router.push(`/sales/${result.id}`);
-      router.refresh();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Satis siparisi kaydedilemedi. Alanlari ve stok durumunu kontrol edin.";
       toast.error(message);

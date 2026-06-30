@@ -232,7 +232,7 @@ export function InvoicesTable({ rows }: { rows: Row[] }) {
         { key: "dueDate", header: "Vade" },
         { key: "status", header: "Durum", render: (row) => <StatusBadge status={String(row.status)} /> },
         { key: "total", header: "Toplam", render: (row) => formatMoney(Number(row.total)) },
-        { key: "paid", header: "Odenen", render: (row) => formatMoney(Number(row.paid)) }
+        { key: "paid", header: "Odenen", render: (row) => (typeof row.paid === "number" ? formatMoney(row.paid) : String(row.paid)) }
       ]}
       searchPlaceholder="Fatura ara"
     />
@@ -367,7 +367,7 @@ export function CustomerInvoicesTable({ rows }: { rows: Row[] }) {
         { key: "invoiceNumber", header: "Fatura" },
         { key: "status", header: "Durum", render: (row) => <StatusBadge status={String(row.status)} /> },
         { key: "total", header: "Tutar", render: (row) => formatMoney(Number(row.total)) },
-        { key: "paid", header: "Odenen", render: (row) => formatMoney(Number(row.paid)) }
+        { key: "paid", header: "Odenen", render: (row) => (typeof row.paid === "number" ? formatMoney(row.paid) : String(row.paid)) }
       ]}
     />
   );

@@ -26,7 +26,6 @@ export function SupplierForm() {
       await createSupplierAction(data);
       toast.success("Tedarikci kaydedildi");
       router.push("/suppliers");
-      router.refresh();
     } catch {
       toast.error("Tedarikci kaydedilemedi. Alanlari kontrol edin.");
     }

@@ -1,9 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import type { PaymentInput } from "@/lib/validations/payment";
-import { InvoiceStatus, Prisma } from "@prisma/client";
+import { InvoiceStatus, InvoiceType, Prisma } from "@prisma/client";
 
 export async function listPayments() {
   return prisma.payment.findMany({
+    where: { invoice: { type: InvoiceType.PURCHASE } },
     include: { invoice: { include: { customer: true, supplier: true } }, user: true },
     orderBy: { paidAt: "desc" }
   });
@@ -16,6 +17,7 @@ export async function createPayment(input: PaymentInput, userId?: string) {
       include: { payments: true }
     });
     if (!invoice) throw new Error("Fatura bulunamadi");
+    if (invoice.type === InvoiceType.SALES) throw new Error("Satis faturalarina odeme girilemez");
     if (invoice.status === InvoiceStatus.CANCELLED) throw new Error("Iptal edilen faturaya odeme girilemez");
 
     const amount = new Prisma.Decimal(input.amount);

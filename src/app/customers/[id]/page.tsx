@@ -16,6 +16,15 @@ function formatDate(date: Date | null) {
   return new Intl.DateTimeFormat("tr-TR").format(date);
 }
 
+function formatInvoiceStatus(type: string, status: string) {
+  if (type === "SALES") return status === "CANCELLED" ? "Iptal" : "Satis faturasi";
+  if (status === "PAID") return "Odendi";
+  if (status === "PARTIALLY_PAID") return "Kismi odendi";
+  if (status === "UNPAID") return "Odenmedi";
+  if (status === "CANCELLED") return "Iptal";
+  return status;
+}
+
 export default async function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const customer = await getCustomer(id);
@@ -32,9 +41,9 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
   const invoiceRows = customer.invoices.map((invoice) => ({
     id: invoice.id,
     invoiceNumber: invoice.invoiceNumber,
-    status: invoice.status,
+    status: formatInvoiceStatus(invoice.type, invoice.status),
     total: Number(invoice.grandTotal),
-    paid: Number(invoice.paidTotal)
+    paid: invoice.type === "SALES" ? "-" : Number(invoice.paidTotal)
   }));
 
   return (

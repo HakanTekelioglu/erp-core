@@ -36,7 +36,6 @@ export function ProductForm({ categories }: { categories: ProductFormCategory[] 
       await createProductAction(data);
       toast.success("Urun kaydedildi");
       router.push("/products");
-      router.refresh();
     } catch {
       toast.error("Urun kaydedilemedi. Kod benzersiz olmali ve alanlari kontrol edin.");
     }

@@ -2,20 +2,21 @@ import { AppShell } from "@/components/layout/app-shell";
 import { ExpenseForm } from "@/components/forms/expense-form";
 import { ExpensesTable } from "@/components/tables/erp-tables";
 import { PageHeader } from "@/components/ui/page-header";
-import { listExpenses } from "@/services/expense-service";
+import { listExpenseRows } from "@/services/expense-service";
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("tr-TR").format(date);
 }
 
 function formatPaymentMethod(method: string) {
+  if (method === "INVOICE") return "Fatura";
   if (method === "CASH") return "Nakit";
   if (method === "CREDIT_CARD") return "Kredi karti";
   return "Banka transferi";
 }
 
 export default async function ExpensesPage() {
-  const expenses = await listExpenses();
+  const expenses = await listExpenseRows();
   const expenseRows = expenses.map((expense) => ({
     id: expense.id,
     title: expense.title,

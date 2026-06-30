@@ -26,7 +26,6 @@ export function CategoryForm() {
       await createCategoryAction(data);
       toast.success("Kategori kaydedildi");
       router.push("/categories");
-      router.refresh();
     } catch {
       toast.error("Kategori kaydedilemedi. Alanlari kontrol edin.");
     }

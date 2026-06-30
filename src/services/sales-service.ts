@@ -8,6 +8,36 @@ function calculateLineTotal(quantity: number, unitPrice: number, vatRate: number
   return afterDiscount + afterDiscount * (vatRate / 100);
 }
 
+async function createInvoiceForSalesOrder(tx: Prisma.TransactionClient, order: {
+  id: string;
+  customerId: string;
+  subtotal: Prisma.Decimal;
+  vatTotal: Prisma.Decimal;
+  discount: Prisma.Decimal;
+  grandTotal: Prisma.Decimal;
+}) {
+  const setting = await tx.companySetting.findFirst();
+  const prefix = setting?.invoicePrefix ?? "SLS";
+  const year = new Date().getFullYear();
+  const invoiceCount = await tx.invoice.count({
+    where: { invoiceNumber: { startsWith: `${prefix}-${year}-` } }
+  });
+
+  return tx.invoice.create({
+    data: {
+      invoiceNumber: `${prefix}-${year}-${String(invoiceCount + 1).padStart(4, "0")}`,
+      type: InvoiceType.SALES,
+      customerId: order.customerId,
+      salesOrderId: order.id,
+      dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+      subtotal: order.subtotal,
+      vatTotal: order.vatTotal,
+      discount: order.discount,
+      grandTotal: order.grandTotal
+    }
+  });
+}
+
 export async function listSalesOrders() {
   return prisma.salesOrder.findMany({
     include: { customer: true, items: { include: { product: true } }, invoice: true },
@@ -58,10 +88,16 @@ export async function approveSalesOrder(id: string) {
   return prisma.$transaction(async (tx) => {
     const order = await tx.salesOrder.findUnique({
       where: { id },
-      include: { items: { include: { product: true } } }
+      include: { invoice: true, items: { include: { product: true } } }
     });
     if (!order) throw new Error("Satis siparisi bulunamadi");
-    if (order.stockPosted) return order;
+    if (order.stockPosted) {
+      if (!order.invoice && order.status !== OrderStatus.CANCELLED) {
+        await createInvoiceForSalesOrder(tx, order);
+      }
+
+      return order;
+    }
 
     for (const item of order.items) {
       if (item.product.stockQuantity.lt(item.quantity)) {
@@ -85,7 +121,7 @@ export async function approveSalesOrder(id: string) {
       });
     }
 
-    return tx.salesOrder.update({
+    const updatedOrder = await tx.salesOrder.update({
       where: { id },
       data: {
         status: OrderStatus.APPROVED,
@@ -93,6 +129,10 @@ export async function approveSalesOrder(id: string) {
         approvedAt: new Date()
       }
     });
+
+    await createInvoiceForSalesOrder(tx, updatedOrder);
+
+    return updatedOrder;
   });
 }
 
@@ -100,7 +140,7 @@ export async function cancelSalesOrder(id: string) {
   return prisma.$transaction(async (tx) => {
     const order = await tx.salesOrder.findUnique({
       where: { id },
-      include: { items: true }
+      include: { invoice: true, items: true }
     });
     if (!order) throw new Error("Satis siparisi bulunamadi");
 
@@ -122,6 +162,13 @@ export async function cancelSalesOrder(id: string) {
       }
     }
 
+    if (order.invoice && order.invoice.status !== "CANCELLED") {
+      await tx.invoice.update({
+        where: { id: order.invoice.id },
+        data: { status: "CANCELLED" }
+      });
+    }
+
     return tx.salesOrder.update({
       where: { id },
       data: { status: OrderStatus.CANCELLED, stockPosted: false }
@@ -140,26 +187,7 @@ export async function createSalesInvoice(id: string) {
     if (order.status === OrderStatus.CANCELLED) throw new Error("Iptal edilen satis faturalanamaz");
     if (!order.stockPosted) throw new Error("Fatura olusturmadan once satisi onaylayin");
 
-    const setting = await tx.companySetting.findFirst();
-    const prefix = setting?.invoicePrefix ?? "SLS";
-    const year = new Date().getFullYear();
-    const invoiceCount = await tx.invoice.count({
-      where: { invoiceNumber: { startsWith: `${prefix}-${year}-` } }
-    });
-
-    return tx.invoice.create({
-      data: {
-        invoiceNumber: `${prefix}-${year}-${String(invoiceCount + 1).padStart(4, "0")}`,
-        type: InvoiceType.SALES,
-        customerId: order.customerId,
-        salesOrderId: order.id,
-        dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-        subtotal: order.subtotal,
-        vatTotal: order.vatTotal,
-        discount: order.discount,
-        grandTotal: order.grandTotal
-      }
-    });
+    return createInvoiceForSalesOrder(tx, order);
   });
 }
 

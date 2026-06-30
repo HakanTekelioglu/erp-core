@@ -54,7 +54,6 @@ export function PurchaseOrderForm({ suppliers, products }: { suppliers: Purchase
       const result = await createPurchaseOrderAction(data);
       toast.success("Satin alma siparisi kaydedildi");
       router.push(`/purchases/${result.id}`);
-      router.refresh();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Satin alma siparisi kaydedilemedi. Alanlari kontrol edin.";
       toast.error(message);

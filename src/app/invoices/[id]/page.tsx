@@ -17,6 +17,15 @@ function formatInvoiceType(type: string) {
   return type === "SALES" ? "Satis" : "Satin Alma";
 }
 
+function formatInvoiceStatus(type: string, status: string) {
+  if (type === "SALES") return status === "CANCELLED" ? "Iptal" : "Satis faturasi";
+  if (status === "PAID") return "Odendi";
+  if (status === "PARTIALLY_PAID") return "Kismi odendi";
+  if (status === "UNPAID") return "Odenmedi";
+  if (status === "CANCELLED") return "Iptal";
+  return status;
+}
+
 function formatPaymentMethod(method: string) {
   if (method === "CASH") return "Nakit";
   if (method === "BANK_TRANSFER") return "Banka transferi";
@@ -54,12 +63,12 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             <div className="flex justify-between"><dt className="text-muted">Indirim</dt><dd className="font-semibold">{formatMoney(Number(invoice.discount))}</dd></div>
             <div className="flex justify-between"><dt className="text-muted">KDV</dt><dd className="font-semibold">{formatMoney(Number(invoice.vatTotal))}</dd></div>
             <div className="flex justify-between"><dt className="text-muted">Toplam</dt><dd className="font-semibold">{formatMoney(Number(invoice.grandTotal))}</dd></div>
-            <div className="flex justify-between"><dt className="text-muted">Odenen</dt><dd className="font-semibold">{formatMoney(Number(invoice.paidTotal))}</dd></div>
-            <div className="flex justify-between"><dt className="text-muted">Durum</dt><dd><StatusBadge status={invoice.status} /></dd></div>
+            <div className="flex justify-between"><dt className="text-muted">Odenen</dt><dd className="font-semibold">{invoice.type === "SALES" ? "-" : formatMoney(Number(invoice.paidTotal))}</dd></div>
+            <div className="flex justify-between"><dt className="text-muted">Durum</dt><dd><StatusBadge status={formatInvoiceStatus(invoice.type, invoice.status)} /></dd></div>
           </dl>
           <InvoicePdfButton />
         </section>
-        <MoneyTable rows={payments} searchPlaceholder="Odeme ara" />
+        {invoice.type === "PURCHASE" ? <MoneyTable rows={payments} searchPlaceholder="Odeme ara" /> : null}
       </div>
     </AppShell>
   );
