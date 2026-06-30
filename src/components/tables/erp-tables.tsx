@@ -366,7 +366,9 @@ export function ReportsTable({ rows }: { rows: Row[] }) {
       columns={[
         { key: "name", header: "Rapor" },
         { key: "owner", header: "Modul" },
-        { key: "status", header: "Durum", render: () => <StatusBadge status="Aktif" /> }
+        { key: "value", header: "Ozet" },
+        { key: "updatedAt", header: "Guncelleme" },
+        { key: "status", header: "Durum", render: (row) => <StatusBadge status={String(row.status)} /> }
       ]}
       searchPlaceholder="Rapor ara"
     />
