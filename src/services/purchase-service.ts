@@ -24,26 +24,50 @@ export async function getPurchaseOrder(id: string) {
 export async function createPurchaseOrder(input: PurchaseOrderInput, userId?: string) {
   const subtotal = input.items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
   const vatTotal = input.items.reduce((sum, item) => sum + item.quantity * item.unitPrice * (item.vatRate / 100), 0);
+  const grandTotal = subtotal + vatTotal;
 
-  return prisma.purchaseOrder.create({
-    data: {
-      orderNumber: `PO-${Date.now()}`,
-      supplierId: input.supplierId,
-      userId,
-      status: input.status,
-      subtotal,
-      vatTotal,
-      grandTotal: subtotal + vatTotal,
-      items: {
-        create: input.items.map((item) => ({
-          productId: item.productId,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          vatRate: item.vatRate,
-          lineTotal: calculateLineTotal(item.quantity, item.unitPrice, item.vatRate)
-        }))
+  return prisma.$transaction(async (tx) => {
+    const order = await tx.purchaseOrder.create({
+      data: {
+        orderNumber: `PO-${Date.now()}`,
+        supplierId: input.supplierId,
+        userId,
+        status: input.status,
+        subtotal,
+        vatTotal,
+        grandTotal,
+        items: {
+          create: input.items.map((item) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            vatRate: item.vatRate,
+            lineTotal: calculateLineTotal(item.quantity, item.unitPrice, item.vatRate)
+          }))
+        }
       }
-    }
+    });
+
+    const year = new Date().getFullYear();
+    const invoiceCount = await tx.invoice.count({
+      where: { invoiceNumber: { startsWith: `PUR-${year}-` } }
+    });
+
+    await tx.invoice.create({
+      data: {
+        invoiceNumber: `PUR-${year}-${String(invoiceCount + 1).padStart(4, "0")}`,
+        type: InvoiceType.PURCHASE,
+        supplierId: order.supplierId,
+        purchaseOrderId: order.id,
+        dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+        subtotal: order.subtotal,
+        vatTotal: order.vatTotal,
+        discount: order.discount,
+        grandTotal: order.grandTotal
+      }
+    });
+
+    return order;
   });
 }
 

@@ -11,6 +11,7 @@ export async function createPurchaseOrderAction(input: PurchaseOrderInput) {
   const order = await createPurchaseOrder(data, session?.user?.id);
 
   revalidatePath("/purchases");
+  revalidatePath("/invoices");
 
   return { id: order.id };
 }

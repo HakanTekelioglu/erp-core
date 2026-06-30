@@ -1,14 +1,36 @@
 import { AppShell } from "@/components/layout/app-shell";
 import { InvoicesTable } from "@/components/tables/erp-tables";
 import { PageHeader } from "@/components/ui/page-header";
-import { demoInvoices } from "@/lib/demo-data";
+import { listInvoices } from "@/services/invoice-service";
 
-export default function InvoicesPage() {
+function formatDate(date: Date | null) {
+  if (!date) return "-";
+
+  return new Intl.DateTimeFormat("tr-TR").format(date);
+}
+
+function formatInvoiceType(type: string) {
+  return type === "SALES" ? "Satis" : "Satin Alma";
+}
+
+export default async function InvoicesPage() {
+  const invoices = await listInvoices();
+  const rows = invoices.map((invoice) => ({
+    id: invoice.id,
+    invoiceNumber: invoice.invoiceNumber,
+    type: formatInvoiceType(invoice.type),
+    party: invoice.customer?.name ?? invoice.supplier?.companyName ?? "-",
+    dueDate: formatDate(invoice.dueDate),
+    status: invoice.status,
+    total: Number(invoice.grandTotal),
+    paid: Number(invoice.paidTotal)
+  }));
+
   return (
     <AppShell>
       <PageHeader title="Fatura Yonetimi" description="Satis ve satin alma faturalarini, vade ve odeme durumlarini takip edin." />
       <div className="p-4">
-        <InvoicesTable rows={demoInvoices} />
+        <InvoicesTable rows={rows} />
       </div>
     </AppShell>
   );
