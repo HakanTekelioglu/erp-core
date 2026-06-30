@@ -323,7 +323,7 @@ export function DashboardTopProductsTable({ rows }: { rows: Row[] }) {
         { key: "name", header: "Urun" },
         { key: "category", header: "Kategori" },
         { key: "sales", header: "Satis adedi" },
-        { key: "stock", header: "Stok", render: (row) => <span className="inline-flex items-center gap-2"><Boxes className="size-4 text-muted" />{String(row.sales)}</span> }
+        { key: "stock", header: "Stok", render: (row) => <span className="inline-flex items-center gap-2"><Boxes className="size-4 text-muted" />{String(row.stock)}</span> }
       ]}
       searchPlaceholder="Cok satanlarda ara"
       pageSize={5}
