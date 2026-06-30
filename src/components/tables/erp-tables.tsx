@@ -6,6 +6,7 @@ import { activateCategoryAction, deactivateCategoryAction, deleteCategoryAction 
 import { activateCustomerAction, deactivateCustomerAction, deleteCustomerAction } from "@/app/customers/actions";
 import { activateProductAction, deactivateProductAction, deleteProductAction } from "@/app/products/actions";
 import { activateSupplierAction, deactivateSupplierAction, deleteSupplierAction } from "@/app/suppliers/actions";
+import { activateUserAction, deactivateUserAction } from "@/app/users/actions";
 import { ActiveToggleRowButton } from "@/components/tables/active-toggle-row-button";
 import { DeleteRowButton } from "@/components/tables/delete-row-button";
 import { DataTable } from "@/components/tables/data-table";
@@ -278,7 +279,20 @@ export function UsersTable({ rows }: { rows: Row[] }) {
         { key: "name", header: "Ad soyad" },
         { key: "email", header: "E-posta" },
         { key: "role", header: "Rol" },
-        { key: "status", header: "Durum", render: (row) => <StatusBadge status={String(row.status)} /> }
+        { key: "status", header: "Durum", render: (row) => <StatusBadge status={String(row.status)} /> },
+        {
+          key: "actions",
+          header: "Islem",
+          render: (row) => (
+            <ActiveToggleRowButton
+              id={String(row.id)}
+              isActive={String(row.status) === "Aktif"}
+              entityName="Kullanici"
+              activateAction={activateUserAction}
+              deactivateAction={deactivateUserAction}
+            />
+          )
+        }
       ]}
       searchPlaceholder="Kullanici ara"
     />
