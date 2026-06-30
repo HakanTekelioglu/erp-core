@@ -19,3 +19,11 @@ export async function updateCategory(id: string, data: CategoryInput) {
 export async function deactivateCategory(id: string) {
   return prisma.category.update({ where: { id }, data: { isActive: false } });
 }
+
+export async function activateCategory(id: string) {
+  return prisma.category.update({ where: { id }, data: { isActive: true } });
+}
+
+export async function deleteCategory(id: string) {
+  return prisma.category.delete({ where: { id } });
+}

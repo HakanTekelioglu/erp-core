@@ -2,6 +2,12 @@
 
 import Link from "next/link";
 import { Boxes } from "lucide-react";
+import { activateCategoryAction, deactivateCategoryAction, deleteCategoryAction } from "@/app/categories/actions";
+import { activateCustomerAction, deactivateCustomerAction, deleteCustomerAction } from "@/app/customers/actions";
+import { activateProductAction, deactivateProductAction, deleteProductAction } from "@/app/products/actions";
+import { activateSupplierAction, deactivateSupplierAction, deleteSupplierAction } from "@/app/suppliers/actions";
+import { ActiveToggleRowButton } from "@/components/tables/active-toggle-row-button";
+import { DeleteRowButton } from "@/components/tables/delete-row-button";
 import { DataTable } from "@/components/tables/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatMoney } from "@/lib/utils";
@@ -18,7 +24,30 @@ export function ProductsTable({ rows }: { rows: Row[] }) {
         { key: "category", header: "Kategori" },
         { key: "stock", header: "Stok", render: (row) => `${row.stock} ${row.unit}` },
         { key: "salePrice", header: "Satis", render: (row) => formatMoney(Number(row.salePrice)) },
-        { key: "status", header: "Durum", render: (row) => <StatusBadge status={String(row.status)} /> }
+        { key: "status", header: "Durum", render: (row) => <StatusBadge status={String(row.status)} /> },
+        {
+          key: "actions",
+          header: "Islem",
+          render: (row) => (
+            <div className="flex flex-wrap gap-2">
+              <ActiveToggleRowButton
+                id={String(row.id)}
+                isActive={String(row.status) === "Aktif"}
+                entityName="Urun"
+                activateAction={activateProductAction}
+                deactivateAction={deactivateProductAction}
+              />
+              <DeleteRowButton
+                id={String(row.id)}
+                disabled={Number(row.usageCount) > 0}
+                confirmMessage="Bu urunu kalici olarak silmek istiyor musunuz? Bu islem geri alinamaz."
+                successMessage="Urun silindi"
+                errorMessage="Urun silinemedi. Stok hareketi, satis veya satin alma kaydinda kullaniliyor olabilir."
+                action={deleteProductAction}
+              />
+            </div>
+          )
+        }
       ]}
       searchPlaceholder="Urun kodu, ad veya kategori ara"
     />
@@ -33,7 +62,30 @@ export function CategoriesTable({ rows }: { rows: Row[] }) {
         { key: "name", header: "Kategori" },
         { key: "description", header: "Aciklama" },
         { key: "productCount", header: "Urun sayisi" },
-        { key: "isActive", header: "Durum", render: (row) => <StatusBadge status={String(row.isActive)} /> }
+        { key: "isActive", header: "Durum", render: (row) => <StatusBadge status={String(row.isActive)} /> },
+        {
+          key: "actions",
+          header: "Islem",
+          render: (row) => (
+            <div className="flex flex-wrap gap-2">
+              <ActiveToggleRowButton
+                id={String(row.id)}
+                isActive={String(row.isActive) === "Aktif"}
+                entityName="Kategori"
+                activateAction={activateCategoryAction}
+                deactivateAction={deactivateCategoryAction}
+              />
+              <DeleteRowButton
+                id={String(row.id)}
+                disabled={Number(row.productCount) > 0}
+                confirmMessage="Bu kategoriyi kalici olarak silmek istiyor musunuz? Bu islem geri alinamaz."
+                successMessage="Kategori silindi"
+                errorMessage="Kategori silinemedi. Bu kategoriye bagli urun olabilir."
+                action={deleteCategoryAction}
+              />
+            </div>
+          )
+        }
       ]}
       searchPlaceholder="Kategori ara"
     />
@@ -67,7 +119,30 @@ export function CustomersTable({ rows }: { rows: Row[] }) {
         { key: "phone", header: "Telefon" },
         { key: "email", header: "E-posta" },
         { key: "balance", header: "Bakiye", render: (row) => formatMoney(Number(row.balance)) },
-        { key: "status", header: "Durum", render: (row) => <StatusBadge status={String(row.status)} /> }
+        { key: "status", header: "Durum", render: (row) => <StatusBadge status={String(row.status)} /> },
+        {
+          key: "actions",
+          header: "Islem",
+          render: (row) => (
+            <div className="flex flex-wrap gap-2">
+              <ActiveToggleRowButton
+                id={String(row.id)}
+                isActive={String(row.status) === "Aktif"}
+                entityName="Musteri"
+                activateAction={activateCustomerAction}
+                deactivateAction={deactivateCustomerAction}
+              />
+              <DeleteRowButton
+                id={String(row.id)}
+                disabled={Number(row.usageCount) > 0}
+                confirmMessage="Bu musteriyi kalici olarak silmek istiyor musunuz? Bu islem geri alinamaz."
+                successMessage="Musteri silindi"
+                errorMessage="Musteri silinemedi. Satis veya fatura kaydinda kullaniliyor olabilir."
+                action={deleteCustomerAction}
+              />
+            </div>
+          )
+        }
       ]}
       searchPlaceholder="Musteri ara"
     />
@@ -83,7 +158,30 @@ export function SuppliersTable({ rows }: { rows: Row[] }) {
         { key: "contactPerson", header: "Yetkili" },
         { key: "phone", header: "Telefon" },
         { key: "email", header: "E-posta" },
-        { key: "status", header: "Durum", render: (row) => <StatusBadge status={String(row.status)} /> }
+        { key: "status", header: "Durum", render: (row) => <StatusBadge status={String(row.status)} /> },
+        {
+          key: "actions",
+          header: "Islem",
+          render: (row) => (
+            <div className="flex flex-wrap gap-2">
+              <ActiveToggleRowButton
+                id={String(row.id)}
+                isActive={String(row.status) === "Aktif"}
+                entityName="Tedarikci"
+                activateAction={activateSupplierAction}
+                deactivateAction={deactivateSupplierAction}
+              />
+              <DeleteRowButton
+                id={String(row.id)}
+                disabled={Number(row.usageCount) > 0}
+                confirmMessage="Bu tedarikciyi kalici olarak silmek istiyor musunuz? Bu islem geri alinamaz."
+                successMessage="Tedarikci silindi"
+                errorMessage="Tedarikci silinemedi. Satin alma veya fatura kaydinda kullaniliyor olabilir."
+                action={deleteSupplierAction}
+              />
+            </div>
+          )
+        }
       ]}
       searchPlaceholder="Tedarikci ara"
     />

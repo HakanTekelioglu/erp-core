@@ -3,7 +3,10 @@ import type { ProductInput } from "@/lib/validations/product";
 
 export async function listProducts() {
   return prisma.product.findMany({
-    include: { category: true },
+    include: {
+      category: true,
+      _count: { select: { stockMovements: true, salesOrderItems: true, purchaseOrderItems: true } }
+    },
     orderBy: { createdAt: "desc" }
   });
 }
@@ -28,4 +31,12 @@ export async function updateProduct(id: string, data: ProductInput) {
 
 export async function deactivateProduct(id: string) {
   return prisma.product.update({ where: { id }, data: { isActive: false } });
+}
+
+export async function activateProduct(id: string) {
+  return prisma.product.update({ where: { id }, data: { isActive: true } });
+}
+
+export async function deleteProduct(id: string) {
+  return prisma.product.delete({ where: { id } });
 }

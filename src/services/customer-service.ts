@@ -22,6 +22,18 @@ export async function createCustomer(data: CustomerInput) {
   return prisma.customer.create({ data });
 }
 
+export async function updateCustomer(id: string, data: CustomerInput) {
+  return prisma.customer.update({ where: { id }, data });
+}
+
 export async function deactivateCustomer(id: string) {
   return prisma.customer.update({ where: { id }, data: { isActive: false } });
+}
+
+export async function activateCustomer(id: string) {
+  return prisma.customer.update({ where: { id }, data: { isActive: true } });
+}
+
+export async function deleteCustomer(id: string) {
+  return prisma.customer.delete({ where: { id } });
 }

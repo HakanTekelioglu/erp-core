@@ -5,41 +5,38 @@ import { Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { createCustomerAction } from "@/app/customers/actions";
+import { createSupplierAction } from "@/app/suppliers/actions";
 import { Button } from "@/components/ui/button";
 import { Input, Select, Textarea } from "@/components/ui/input";
-import { customerSchema, type CustomerInput } from "@/lib/validations/customer";
+import { supplierSchema, type SupplierInput } from "@/lib/validations/supplier";
 
-export function CustomerForm() {
+export function SupplierForm() {
   const router = useRouter();
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting }
-  } = useForm<CustomerInput>({
-    resolver: zodResolver(customerSchema),
-    defaultValues: { type: "CORPORATE", isActive: true }
+  } = useForm<SupplierInput>({
+    resolver: zodResolver(supplierSchema),
+    defaultValues: { isActive: true }
   });
 
-  async function onSubmit(data: CustomerInput) {
+  async function onSubmit(data: SupplierInput) {
     try {
-      await createCustomerAction(data);
-      toast.success("Musteri kaydedildi");
-      router.push("/customers");
+      await createSupplierAction(data);
+      toast.success("Tedarikci kaydedildi");
+      router.push("/suppliers");
       router.refresh();
     } catch {
-      toast.error("Musteri kaydedilemedi. Alanlari kontrol edin.");
+      toast.error("Tedarikci kaydedilemedi. Alanlari kontrol edin.");
     }
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 rounded-lg border border-border bg-white p-5 shadow-sm">
       <div className="grid gap-4 lg:grid-cols-2">
-        <Select label="Musteri tipi" {...register("type")} error={errors.type?.message}>
-          <option value="INDIVIDUAL">Bireysel</option>
-          <option value="CORPORATE">Kurumsal</option>
-        </Select>
-        <Input label="Ad soyad / Sirket adi" {...register("name")} error={errors.name?.message} />
+        <Input label="Firma adi" {...register("companyName")} error={errors.companyName?.message} />
+        <Input label="Yetkili kisi" {...register("contactPerson")} error={errors.contactPerson?.message} />
         <Input label="Telefon" {...register("phone")} error={errors.phone?.message} />
         <Input label="E-posta" {...register("email")} error={errors.email?.message} />
         <Input label="Vergi numarasi" {...register("taxNumber")} error={errors.taxNumber?.message} />

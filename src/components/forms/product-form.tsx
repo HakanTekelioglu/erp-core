@@ -2,14 +2,21 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Save } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { createProductAction } from "@/app/products/actions";
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/input";
-import { demoCategories } from "@/lib/demo-data";
 import { productSchema, type ProductInput } from "@/lib/validations/product";
 
-export function ProductForm() {
+type ProductFormCategory = {
+  id: string;
+  name: string;
+};
+
+export function ProductForm({ categories }: { categories: ProductFormCategory[] }) {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -24,9 +31,15 @@ export function ProductForm() {
     }
   });
 
-  function onSubmit(data: ProductInput) {
-    console.log("product form", data);
-    toast.success("Urun kaydi demo olarak dogrulandi");
+  async function onSubmit(data: ProductInput) {
+    try {
+      await createProductAction(data);
+      toast.success("Urun kaydedildi");
+      router.push("/products");
+      router.refresh();
+    } catch {
+      toast.error("Urun kaydedilemedi. Kod benzersiz olmali ve alanlari kontrol edin.");
+    }
   }
 
   return (
@@ -37,7 +50,7 @@ export function ProductForm() {
         <Input label="Urun adi" {...register("name")} error={errors.name?.message} />
         <Select label="Kategori" {...register("categoryId")} error={errors.categoryId?.message}>
           <option value="">Kategori secin</option>
-          {demoCategories.map((category) => (
+          {categories.map((category) => (
             <option key={category.id} value={category.id}>
               {category.name}
             </option>
