@@ -1,35 +1,30 @@
-import { Save } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
-import { Button } from "@/components/ui/button";
-import { Input, Select } from "@/components/ui/input";
+import { PurchaseOrderForm } from "@/components/forms/purchase-order-form";
 import { PageHeader } from "@/components/ui/page-header";
-import { demoProducts, demoSuppliers } from "@/lib/demo-data";
+import { listProducts } from "@/services/product-service";
+import { listSuppliers } from "@/services/supplier-service";
 
-export default function NewPurchasePage() {
+export default async function NewPurchasePage() {
+  const [suppliers, products] = await Promise.all([listSuppliers(), listProducts()]);
+  const supplierOptions = suppliers
+    .filter((supplier) => supplier.isActive)
+    .map((supplier) => ({ id: supplier.id, companyName: supplier.companyName }));
+  const productOptions = products
+    .filter((product) => product.isActive)
+    .map((product) => ({
+      id: product.id,
+      name: product.name,
+      purchasePrice: Number(product.purchasePrice),
+      vatRate: Number(product.vatRate),
+      unit: product.unit,
+      stockQuantity: Number(product.stockQuantity)
+    }));
+
   return (
     <AppShell>
-      <PageHeader title="Yeni Satin Alma" description="Tedarikci ve urun kalemleriyle satin alma siparisi olusturun." />
+      <PageHeader title="Yeni Satin Alma" description="Tedarikci ve urun kalemleriyle satin alma siparisi olusturun; teslim alindiginda stok girisi otomatik islenir." />
       <div className="p-4">
-        <form className="grid gap-4 rounded-lg border border-border bg-white p-5 shadow-sm">
-          <div className="grid gap-4 lg:grid-cols-2">
-            <Select label="Tedarikci" name="supplierId">
-              {demoSuppliers.map((supplier) => <option key={supplier.id} value={supplier.id}>{supplier.companyName}</option>)}
-            </Select>
-            <Select label="Durum" name="status">
-              <option value="DRAFT">Taslak</option>
-              <option value="ORDERED">Siparis verildi</option>
-            </Select>
-            <Select label="Urun" name="productId">
-              {demoProducts.map((product) => <option key={product.id} value={product.id}>{product.name}</option>)}
-            </Select>
-            <Input label="Miktar" type="number" defaultValue={1} />
-            <Input label="Birim fiyat" type="number" defaultValue={0} />
-            <Input label="KDV orani" type="number" defaultValue={20} />
-          </div>
-          <div className="flex justify-end">
-            <Button type="button"><Save className="size-4" aria-hidden />Kaydet</Button>
-          </div>
-        </form>
+        <PurchaseOrderForm suppliers={supplierOptions} products={productOptions} />
       </div>
     </AppShell>
   );
