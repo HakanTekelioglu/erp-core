@@ -1,0 +1,334 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  SALES
+  WAREHOUSE
+  ACCOUNTING
+}
+
+enum OrderStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  COMPLETED
+  CANCELLED
+}
+
+enum PurchaseStatus {
+  DRAFT
+  ORDERED
+  RECEIVED
+  CANCELLED
+}
+
+enum InvoiceType {
+  SALES
+  PURCHASE
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PARTIALLY_PAID
+  PAID
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CREDIT_CARD
+}
+
+enum StockMovementType {
+  PURCHASE_IN
+  SALE_OUT
+  RETURN_IN
+  RETURN_OUT
+  ADJUSTMENT
+}
+
+enum CustomerType {
+  INDIVIDUAL
+  CORPORATE
+}
+
+enum UnitType {
+  ADET
+  KG
+  LITRE
+  PAKET
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(SALES)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  salesOrders    SalesOrder[]
+  purchaseOrders PurchaseOrder[]
+  payments       Payment[]
+  expenses       Expense[]
+}
+
+model CompanySetting {
+  id                 String   @id @default(cuid())
+  companyName        String
+  address            String?
+  phone              String?
+  email              String?
+  taxNumber          String?
+  defaultCurrency    String   @default("TRY")
+  defaultVatRate     Decimal  @default(20)
+  invoicePrefix      String   @default("ERP")
+  nextInvoiceCounter Int      @default(1)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+}
+
+model Product {
+  id                String   @id @default(cuid())
+  code              String   @unique
+  barcode           String?
+  name              String
+  categoryId        String
+  purchasePrice     Decimal
+  salePrice         Decimal
+  vatRate           Decimal  @default(20)
+  unit              UnitType @default(ADET)
+  stockQuantity     Decimal  @default(0)
+  minimumStockLevel Decimal  @default(0)
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  category           Category            @relation(fields: [categoryId], references: [id])
+  stockMovements     StockMovement[]
+  salesOrderItems    SalesOrderItem[]
+  purchaseOrderItems PurchaseOrderItem[]
+
+  @@index([categoryId])
+  @@index([isActive])
+}
+
+model StockMovement {
+  id          String            @id @default(cuid())
+  productId   String
+  type        StockMovementType
+  quantity    Decimal
+  note        String?
+  reference   String?
+  movementAt  DateTime          @default(now())
+  createdAt   DateTime          @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([productId, movementAt])
+  @@index([type])
+}
+
+model Customer {
+  id          String       @id @default(cuid())
+  type        CustomerType @default(INDIVIDUAL)
+  name        String
+  phone       String?
+  email       String?
+  address     String?
+  taxNumber   String?
+  balance     Decimal      @default(0)
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  salesOrders SalesOrder[]
+  invoices    Invoice[]
+
+  @@index([isActive])
+}
+
+model Supplier {
+  id            String   @id @default(cuid())
+  companyName   String
+  contactPerson String?
+  phone         String?
+  email         String?
+  address       String?
+  taxNumber     String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  purchaseOrders PurchaseOrder[]
+  invoices       Invoice[]
+
+  @@index([isActive])
+}
+
+model SalesOrder {
+  id          String      @id @default(cuid())
+  orderNumber String      @unique
+  customerId  String
+  userId      String?
+  status      OrderStatus @default(DRAFT)
+  subtotal    Decimal     @default(0)
+  vatTotal    Decimal     @default(0)
+  discount    Decimal     @default(0)
+  grandTotal  Decimal     @default(0)
+  stockPosted Boolean     @default(false)
+  approvedAt  DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  customer Customer         @relation(fields: [customerId], references: [id])
+  user     User?            @relation(fields: [userId], references: [id])
+  items    SalesOrderItem[]
+  invoice  Invoice?
+
+  @@index([customerId])
+  @@index([status])
+}
+
+model SalesOrderItem {
+  id           String  @id @default(cuid())
+  salesOrderId String
+  productId    String
+  quantity     Decimal
+  unitPrice    Decimal
+  vatRate      Decimal @default(20)
+  discount     Decimal @default(0)
+  lineTotal    Decimal
+
+  salesOrder SalesOrder @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
+  product    Product    @relation(fields: [productId], references: [id])
+
+  @@index([salesOrderId])
+  @@index([productId])
+}
+
+model PurchaseOrder {
+  id            String         @id @default(cuid())
+  orderNumber   String         @unique
+  supplierId    String
+  userId        String?
+  status        PurchaseStatus @default(DRAFT)
+  subtotal      Decimal        @default(0)
+  vatTotal      Decimal        @default(0)
+  discount      Decimal        @default(0)
+  grandTotal    Decimal        @default(0)
+  stockReceived Boolean        @default(false)
+  receivedAt    DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  supplier Supplier            @relation(fields: [supplierId], references: [id])
+  user     User?               @relation(fields: [userId], references: [id])
+  items    PurchaseOrderItem[]
+  invoice  Invoice?
+
+  @@index([supplierId])
+  @@index([status])
+}
+
+model PurchaseOrderItem {
+  id              String  @id @default(cuid())
+  purchaseOrderId String
+  productId       String
+  quantity        Decimal
+  unitPrice       Decimal
+  vatRate         Decimal @default(20)
+  lineTotal       Decimal
+
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  product       Product       @relation(fields: [productId], references: [id])
+
+  @@index([purchaseOrderId])
+  @@index([productId])
+}
+
+model Invoice {
+  id              String        @id @default(cuid())
+  invoiceNumber   String        @unique
+  type            InvoiceType
+  status          InvoiceStatus @default(UNPAID)
+  customerId      String?
+  supplierId      String?
+  salesOrderId    String?       @unique
+  purchaseOrderId String?       @unique
+  invoiceDate     DateTime      @default(now())
+  dueDate         DateTime?
+  subtotal        Decimal       @default(0)
+  vatTotal        Decimal       @default(0)
+  discount        Decimal       @default(0)
+  grandTotal      Decimal       @default(0)
+  paidTotal       Decimal       @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  customer      Customer?      @relation(fields: [customerId], references: [id])
+  supplier      Supplier?      @relation(fields: [supplierId], references: [id])
+  salesOrder    SalesOrder?    @relation(fields: [salesOrderId], references: [id])
+  purchaseOrder PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
+  payments      Payment[]
+
+  @@index([type, status])
+  @@index([customerId])
+  @@index([supplierId])
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  invoiceId   String
+  userId      String?
+  amount      Decimal
+  method      PaymentMethod
+  paidAt      DateTime      @default(now())
+  note        String?
+  createdAt   DateTime      @default(now())
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+  user    User?   @relation(fields: [userId], references: [id])
+
+  @@index([invoiceId])
+  @@index([method])
+}
+
+model Expense {
+  id          String        @id @default(cuid())
+  userId      String?
+  title       String
+  category    String
+  amount      Decimal
+  method      PaymentMethod @default(BANK_TRANSFER)
+  expenseDate DateTime      @default(now())
+  note        String?
+  createdAt   DateTime      @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([expenseDate])
+  @@index([category])
+}
