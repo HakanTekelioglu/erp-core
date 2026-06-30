@@ -7,9 +7,10 @@ import { Factory } from "lucide-react";
 import { getMenuForRole } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
-export function Sidebar({ role }: { role: Role }) {
+export function Sidebar({ role, companyName }: { role: Role; companyName: string }) {
   const pathname = usePathname();
   const items = getMenuForRole(role);
+  const displayName = companyName.replace(/\s*ERP Sistemi\s*$/i, "") || companyName;
 
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 border-r border-border bg-white md:flex md:flex-col">
@@ -17,8 +18,10 @@ export function Sidebar({ role }: { role: Role }) {
         <span className="inline-flex size-10 items-center justify-center rounded-md bg-brand text-white">
           <Factory className="size-5" aria-hidden />
         </span>
-        <div>
-          <p className="text-sm font-semibold text-ink">Kucuk Isletme</p>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-ink" title={companyName}>
+            {displayName}
+          </p>
           <p className="text-xs font-medium text-muted">ERP Sistemi</p>
         </div>
       </div>
