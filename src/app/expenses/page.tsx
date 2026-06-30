@@ -1,28 +1,36 @@
-import { Plus } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
+import { ExpenseForm } from "@/components/forms/expense-form";
 import { ExpensesTable } from "@/components/tables/erp-tables";
-import { Button } from "@/components/ui/button";
-import { Input, Select } from "@/components/ui/input";
 import { PageHeader } from "@/components/ui/page-header";
-import { demoExpenses } from "@/lib/demo-data";
+import { listExpenses } from "@/services/expense-service";
 
-export default function ExpensesPage() {
+function formatDate(date: Date) {
+  return new Intl.DateTimeFormat("tr-TR").format(date);
+}
+
+function formatPaymentMethod(method: string) {
+  if (method === "CASH") return "Nakit";
+  if (method === "CREDIT_CARD") return "Kredi karti";
+  return "Banka transferi";
+}
+
+export default async function ExpensesPage() {
+  const expenses = await listExpenses();
+  const expenseRows = expenses.map((expense) => ({
+    id: expense.id,
+    title: expense.title,
+    category: expense.category,
+    date: formatDate(expense.expenseDate),
+    method: formatPaymentMethod(expense.method),
+    amount: Number(expense.amount)
+  }));
+
   return (
     <AppShell>
       <PageHeader title="Gider Yonetimi" description="Operasyon, lojistik ve diger isletme giderlerini takip edin." />
       <div className="grid gap-4 p-4 xl:grid-cols-[380px_1fr]">
-        <form className="grid gap-4 rounded-lg border border-border bg-white p-5 shadow-sm">
-          <Input label="Gider basligi" name="title" />
-          <Input label="Kategori" name="category" />
-          <Input label="Tutar" type="number" step="0.01" name="amount" />
-          <Select label="Odeme yontemi" name="method">
-            <option value="CASH">Nakit</option>
-            <option value="BANK_TRANSFER">Banka transferi</option>
-            <option value="CREDIT_CARD">Kredi karti</option>
-          </Select>
-          <Button type="button"><Plus className="size-4" aria-hidden />Gider ekle</Button>
-        </form>
-        <ExpensesTable rows={demoExpenses} />
+        <ExpenseForm />
+        <ExpensesTable rows={expenseRows} />
       </div>
     </AppShell>
   );
