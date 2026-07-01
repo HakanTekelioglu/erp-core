@@ -15,10 +15,52 @@ function getMonthKey(date: Date) {
   return `${date.getFullYear()}-${date.getMonth()}`;
 }
 
+function getMonthRange(date: Date) {
+  const start = new Date(date.getFullYear(), date.getMonth(), 1);
+  const end = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+
+  return { start, end };
+}
+
+async function getReportDate(now = new Date()) {
+  const currentMonth = getMonthRange(now);
+
+  const currentActivityCount = await Promise.all([
+    prisma.invoice.count({
+      where: {
+        invoiceDate: { gte: currentMonth.start, lt: currentMonth.end },
+        status: { not: "CANCELLED" }
+      }
+    }),
+    prisma.expense.count({ where: { expenseDate: { gte: currentMonth.start, lt: currentMonth.end } } })
+  ]).then((counts) => counts.reduce((total, count) => total + count, 0));
+
+  if (currentActivityCount > 0) return now;
+
+  const [latestInvoice, latestExpense] = await Promise.all([
+    prisma.invoice.findFirst({
+      where: { status: { not: "CANCELLED" } },
+      orderBy: { invoiceDate: "desc" },
+      select: { invoiceDate: true }
+    }),
+    prisma.expense.findFirst({
+      orderBy: { expenseDate: "desc" },
+      select: { expenseDate: true }
+    })
+  ]);
+
+  const latestDates = [latestInvoice?.invoiceDate, latestExpense?.expenseDate]
+    .filter((date): date is Date => Boolean(date))
+    .sort((first, second) => second.getTime() - first.getTime());
+
+  return latestDates[0] ?? now;
+}
+
 export async function getDashboardReport() {
   const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const chartStart = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+  const reportDate = await getReportDate(now);
+  const reportMonth = getMonthRange(reportDate);
+  const chartStart = new Date(reportDate.getFullYear(), reportDate.getMonth() - 5, 1);
 
   const [
     salesSummary,
@@ -37,15 +79,15 @@ export async function getDashboardReport() {
   ] = await Promise.all([
     prisma.invoice.aggregate({
       _sum: { grandTotal: true },
-      where: { type: "SALES", invoiceDate: { gte: monthStart }, status: { not: "CANCELLED" } }
+      where: { type: "SALES", invoiceDate: { gte: reportMonth.start, lt: reportMonth.end }, status: { not: "CANCELLED" } }
     }),
     prisma.expense.aggregate({
       _sum: { amount: true },
-      where: { expenseDate: { gte: monthStart } }
+      where: { expenseDate: { gte: reportMonth.start, lt: reportMonth.end } }
     }),
     prisma.invoice.aggregate({
       _sum: { grandTotal: true },
-      where: { type: "PURCHASE", invoiceDate: { gte: monthStart }, status: { not: "CANCELLED" } }
+      where: { type: "PURCHASE", invoiceDate: { gte: reportMonth.start, lt: reportMonth.end }, status: { not: "CANCELLED" } }
     }),
     prisma.customer.count({ where: { isActive: true } }),
     prisma.product.count({ where: { isActive: true } }),
@@ -67,7 +109,7 @@ export async function getDashboardReport() {
     }),
     prisma.salesOrderItem.groupBy({
       by: ["productId"],
-      where: { salesOrder: { createdAt: { gte: monthStart }, status: { not: "CANCELLED" } } },
+      where: { salesOrder: { createdAt: { gte: reportMonth.start, lt: reportMonth.end }, status: { not: "CANCELLED" } } },
       _sum: { quantity: true },
       orderBy: { _sum: { quantity: "desc" } },
       take: 5
@@ -84,7 +126,7 @@ export async function getDashboardReport() {
 
   const monthlySales = Number(salesSummary._sum.grandTotal ?? 0);
   const monthlyExpense = Number(expenseSummary._sum.amount ?? 0) + Number(purchaseExpenseSummary._sum.grandTotal ?? 0);
-  const monthBuckets = getLastSixMonthBuckets(now);
+  const monthBuckets = getLastSixMonthBuckets(reportDate);
   const chartData = monthBuckets.map((bucket) => ({
     month: bucket.label,
     sales: chartSalesInvoices
@@ -102,7 +144,7 @@ export async function getDashboardReport() {
   }));
 
   return {
-    monthLabel: new Intl.DateTimeFormat("tr-TR", { month: "long", year: "numeric" }).format(now),
+    monthLabel: new Intl.DateTimeFormat("tr-TR", { month: "long", year: "numeric" }).format(reportDate),
     monthlySales,
     monthlyExpense,
     estimatedProfit: monthlySales - monthlyExpense,
@@ -138,7 +180,8 @@ export async function getDashboardReport() {
 
 export async function getReportsOverview() {
   const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const reportDate = await getReportDate(now);
+  const reportMonth = getMonthRange(reportDate);
 
   const [
     salesInvoices,
@@ -152,11 +195,11 @@ export async function getReportsOverview() {
     salesItems
   ] = await Promise.all([
     prisma.invoice.findMany({
-      where: { type: "SALES", invoiceDate: { gte: monthStart }, status: { not: "CANCELLED" } }
+      where: { type: "SALES", invoiceDate: { gte: reportMonth.start, lt: reportMonth.end }, status: { not: "CANCELLED" } }
     }),
-    prisma.expense.findMany({ where: { expenseDate: { gte: monthStart } } }),
+    prisma.expense.findMany({ where: { expenseDate: { gte: reportMonth.start, lt: reportMonth.end } } }),
     prisma.invoice.findMany({
-      where: { type: "PURCHASE", invoiceDate: { gte: monthStart }, status: { not: "CANCELLED" } }
+      where: { type: "PURCHASE", invoiceDate: { gte: reportMonth.start, lt: reportMonth.end }, status: { not: "CANCELLED" } }
     }),
     prisma.customer.count({ where: { isActive: true } }),
     prisma.product.count({ where: { isActive: true } }),
@@ -170,7 +213,7 @@ export async function getReportsOverview() {
       select: { grandTotal: true, paidTotal: true }
     }),
     prisma.salesOrderItem.findMany({
-      where: { salesOrder: { createdAt: { gte: monthStart }, status: { not: "CANCELLED" } } },
+      where: { salesOrder: { createdAt: { gte: reportMonth.start, lt: reportMonth.end }, status: { not: "CANCELLED" } } },
       include: { product: true }
     })
   ]);
@@ -205,7 +248,7 @@ export async function getReportsOverview() {
   const topProduct = Object.values(productSales).sort((first, second) => second.total - first.total)[0];
 
   return {
-    monthLabel: new Intl.DateTimeFormat("tr-TR", { month: "long", year: "numeric" }).format(now),
+    monthLabel: new Intl.DateTimeFormat("tr-TR", { month: "long", year: "numeric" }).format(reportDate),
     monthlySales,
     monthlyExpense,
     estimatedProfit: monthlySales - monthlyExpense,
