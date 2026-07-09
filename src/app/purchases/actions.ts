@@ -1,13 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getCurrentUser } from "@/lib/auth";
+import { requirePathAccess } from "@/lib/action-auth";
 import { purchaseOrderSchema, type PurchaseOrderInput } from "@/lib/validations/purchase";
 import { cancelPurchaseOrder, createPurchaseInvoice, createPurchaseOrder, receivePurchaseOrder } from "@/services/purchase-service";
 
 export async function createPurchaseOrderAction(input: PurchaseOrderInput) {
+  const session = await requirePathAccess("/purchases");
   const data = purchaseOrderSchema.parse(input);
-  const session = await getCurrentUser();
   const order = await createPurchaseOrder(data, session?.user?.id);
 
   revalidatePath("/purchases");
@@ -20,6 +20,7 @@ export async function createPurchaseOrderAction(input: PurchaseOrderInput) {
 }
 
 export async function receivePurchaseOrderAction(id: string) {
+  await requirePathAccess("/purchases");
   await receivePurchaseOrder(id);
 
   revalidatePath("/purchases");
@@ -32,6 +33,7 @@ export async function receivePurchaseOrderAction(id: string) {
 }
 
 export async function cancelPurchaseOrderAction(id: string) {
+  await requirePathAccess("/purchases");
   await cancelPurchaseOrder(id);
 
   revalidatePath("/purchases");
@@ -45,6 +47,7 @@ export async function cancelPurchaseOrderAction(id: string) {
 }
 
 export async function createPurchaseInvoiceAction(id: string) {
+  await requirePathAccess("/purchases");
   const invoice = await createPurchaseInvoice(id);
 
   revalidatePath("/purchases");

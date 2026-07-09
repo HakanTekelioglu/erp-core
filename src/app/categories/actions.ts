@@ -1,10 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { requirePathAccess } from "@/lib/action-auth";
 import { activateCategory, createCategory, deactivateCategory, deleteCategory } from "@/services/category-service";
 import { categorySchema, type CategoryInput } from "@/lib/validations/category";
 
 export async function createCategoryAction(input: CategoryInput) {
+  await requirePathAccess("/categories");
   const data = categorySchema.parse(input);
 
   await createCategory({
@@ -18,6 +20,7 @@ export async function createCategoryAction(input: CategoryInput) {
 }
 
 export async function deactivateCategoryAction(id: string) {
+  await requirePathAccess("/categories");
   await deactivateCategory(id);
 
   revalidatePath("/categories");
@@ -25,6 +28,7 @@ export async function deactivateCategoryAction(id: string) {
 }
 
 export async function activateCategoryAction(id: string) {
+  await requirePathAccess("/categories");
   await activateCategory(id);
 
   revalidatePath("/categories");
@@ -32,6 +36,7 @@ export async function activateCategoryAction(id: string) {
 }
 
 export async function deleteCategoryAction(id: string) {
+  await requirePathAccess("/categories");
   await deleteCategory(id);
 
   revalidatePath("/categories");

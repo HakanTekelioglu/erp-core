@@ -56,7 +56,7 @@ export const demoExpenses = [
 ];
 
 export const demoUsers = [
-  { id: "usr-1", name: "ERP Admin", email: "admin@minierp.local", role: "ADMIN", status: "Aktif" },
+  { id: "usr-1", name: "Sistem Yoneticisi", email: "yonetici@minierp.local", role: "ADMIN", status: "Aktif" },
   { id: "usr-2", name: "Satis Uzmani", email: "satis@minierp.local", role: "SALES", status: "Aktif" },
   { id: "usr-3", name: "Depo Sorumlusu", email: "depo@minierp.local", role: "WAREHOUSE", status: "Aktif" }
 ];

@@ -3,6 +3,21 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
+function getSeedAdminCredentials() {
+  const email = process.env.SEED_ADMIN_EMAIL?.trim().toLocaleLowerCase("tr-TR");
+  const password = process.env.SEED_ADMIN_PASSWORD?.trim();
+
+  if (!email || email === "change-this-admin@example.com" || !email.includes("@")) {
+    throw new Error("SEED_ADMIN_EMAIL .env icinde gecerli bir admin e-posta adresi olarak ayarlanmali.");
+  }
+
+  if (!password || password === "change-this-admin-password" || password.length < 12) {
+    throw new Error("SEED_ADMIN_PASSWORD .env icinde en az 12 karakterlik guclu bir deger olarak ayarlanmali.");
+  }
+
+  return { email, password };
+}
+
 async function main() {
   await prisma.payment.deleteMany();
   await prisma.invoice.deleteMany();
@@ -19,12 +34,13 @@ async function main() {
   await prisma.companySetting.deleteMany();
   await prisma.user.deleteMany();
 
-  const passwordHash = await bcrypt.hash("Admin123!", 10);
+  const seedAdmin = getSeedAdminCredentials();
+  const passwordHash = await bcrypt.hash(seedAdmin.password, 10);
 
   const admin = await prisma.user.create({
     data: {
       name: "ERP Admin",
-      email: "admin@minierp.local",
+      email: seedAdmin.email,
       passwordHash,
       role: Role.ADMIN
     }

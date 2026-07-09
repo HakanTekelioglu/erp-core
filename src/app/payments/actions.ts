@@ -1,13 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getCurrentUser } from "@/lib/auth";
+import { requirePathAccess } from "@/lib/action-auth";
 import { paymentSchema, type PaymentActionInput } from "@/lib/validations/payment";
 import { createPayment } from "@/services/payment-service";
 
 export async function createPaymentAction(input: PaymentActionInput) {
+  const session = await requirePathAccess("/payments");
   const data = paymentSchema.parse(input);
-  const session = await getCurrentUser();
   const payment = await createPayment(
     {
       ...data,

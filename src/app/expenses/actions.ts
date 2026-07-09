@@ -1,13 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getCurrentUser } from "@/lib/auth";
+import { requirePathAccess } from "@/lib/action-auth";
 import { expenseSchema, type ExpenseActionInput } from "@/lib/validations/expense";
 import { createExpense } from "@/services/expense-service";
 
 export async function createExpenseAction(input: ExpenseActionInput) {
+  const session = await requirePathAccess("/expenses");
   const data = expenseSchema.parse(input);
-  const session = await getCurrentUser();
   const expense = await createExpense(
     {
       ...data,

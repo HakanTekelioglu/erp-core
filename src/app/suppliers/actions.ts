@@ -1,10 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { requirePathAccess } from "@/lib/action-auth";
 import { activateSupplier, createSupplier, deactivateSupplier, deleteSupplier } from "@/services/supplier-service";
 import { supplierSchema, type SupplierInput } from "@/lib/validations/supplier";
 
 export async function createSupplierAction(input: SupplierInput) {
+  await requirePathAccess("/suppliers");
   const data = supplierSchema.parse(input);
 
   await createSupplier({
@@ -21,18 +23,21 @@ export async function createSupplierAction(input: SupplierInput) {
 }
 
 export async function deactivateSupplierAction(id: string) {
+  await requirePathAccess("/suppliers");
   await deactivateSupplier(id);
 
   revalidatePath("/suppliers");
 }
 
 export async function activateSupplierAction(id: string) {
+  await requirePathAccess("/suppliers");
   await activateSupplier(id);
 
   revalidatePath("/suppliers");
 }
 
 export async function deleteSupplierAction(id: string) {
+  await requirePathAccess("/suppliers");
   await deleteSupplier(id);
 
   revalidatePath("/suppliers");

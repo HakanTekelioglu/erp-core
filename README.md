@@ -13,10 +13,11 @@ npm run prisma:seed
 npm run dev
 ```
 
-Demo kullanici:
+Seed komutunu calistirmadan once `.env` icindeki degerleri degistirin:
 
-- E-posta: `admin@minierp.local`
-- Sifre: `Admin123!`
+- `NEXTAUTH_SECRET`: guclu ve benzersiz bir secret olmalidir.
+- `SEED_ADMIN_EMAIL`: ilk admin kullanicinin e-posta adresi.
+- `SEED_ADMIN_PASSWORD`: ilk admin kullanicinin sifresi, en az 12 karakter olmalidir.
 
 ## Mimari
 
