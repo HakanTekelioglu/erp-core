@@ -155,8 +155,8 @@ async function main() {
       approvedAt: new Date(),
       items: {
         create: [
-          { productId: products[0].id, quantity: 2, unitPrice: 310, vatRate: 10, lineTotal: 682 },
-          { productId: products[2].id, quantity: 3, unitPrice: 135, vatRate: 20, lineTotal: 486 }
+          { productId: products[0].id, quantity: 2, unitPrice: 310, unitCost: 210, vatRate: 10, lineTotal: 682 },
+          { productId: products[2].id, quantity: 3, unitPrice: 135, unitCost: 92, vatRate: 20, lineTotal: 486 }
         ]
       }
     }

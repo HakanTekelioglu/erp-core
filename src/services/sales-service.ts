@@ -53,6 +53,16 @@ export async function getSalesOrder(id: string) {
 }
 
 export async function createSalesOrder(input: SalesOrderInput, userId?: string) {
+  const products = await prisma.product.findMany({
+    where: { id: { in: input.items.map((item) => item.productId) } },
+    select: { id: true, purchasePrice: true }
+  });
+  const productCosts = new Map(products.map((product) => [product.id, product.purchasePrice]));
+
+  if (productCosts.size !== new Set(input.items.map((item) => item.productId)).size) {
+    throw new Error("Satis siparisindeki urunlerden biri bulunamadi");
+  }
+
   const subtotal = input.items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
   const discount = input.items.reduce((sum, item) => sum + item.discount, 0);
   const vatTotal = input.items.reduce((sum, item) => {
@@ -75,6 +85,7 @@ export async function createSalesOrder(input: SalesOrderInput, userId?: string) 
           productId: item.productId,
           quantity: item.quantity,
           unitPrice: item.unitPrice,
+          unitCost: productCosts.get(item.productId)!,
           vatRate: item.vatRate,
           discount: item.discount,
           lineTotal: calculateLineTotal(item.quantity, item.unitPrice, item.vatRate, item.discount)
@@ -106,6 +117,10 @@ export async function approveSalesOrder(id: string) {
     }
 
     for (const item of order.items) {
+      await tx.salesOrderItem.update({
+        where: { id: item.id },
+        data: { unitCost: item.product.purchasePrice }
+      });
       await tx.product.update({
         where: { id: item.productId },
         data: { stockQuantity: { decrement: item.quantity } }

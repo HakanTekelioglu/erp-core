@@ -331,6 +331,26 @@ export function DashboardTopProductsTable({ rows }: { rows: Row[] }) {
   );
 }
 
+export function DashboardExpectedProfitTable({ rows }: { rows: Row[] }) {
+  return (
+    <DataTable
+      rows={rows}
+      columns={[
+        { key: "code", header: "Kod" },
+        { key: "name", header: "Urun" },
+        { key: "stock", header: "Stok", render: (row) => `${row.stock} ${row.unit}` },
+        { key: "purchasePrice", header: "Alis", render: (row) => formatMoney(Number(row.purchasePrice)) },
+        { key: "salePrice", header: "Satis", render: (row) => formatMoney(Number(row.salePrice)) },
+        { key: "stockProfit", header: "Stok kar potansiyeli", render: (row) => formatMoney(Number(row.stockProfit)) },
+        { key: "realizedProfit", header: "Gerceklesen kar", render: (row) => formatMoney(Number(row.realizedProfit)) },
+        { key: "totalProfit", header: "Toplam beklenti", render: (row) => <span className="font-semibold text-brand">{formatMoney(Number(row.totalProfit))}</span> }
+      ]}
+      searchPlaceholder="Beklenen karda urun ara"
+      pageSize={8}
+    />
+  );
+}
+
 export function MoneyTable({ rows, searchPlaceholder = "Ara" }: { rows: Row[]; searchPlaceholder?: string }) {
   return (
     <DataTable

@@ -16,6 +16,7 @@ export async function createProductAction(input: ProductInput) {
 
   revalidatePath("/products");
   revalidatePath("/stock");
+  revalidatePath("/dashboard");
 }
 
 export async function deactivateProductAction(id: string) {
@@ -24,6 +25,7 @@ export async function deactivateProductAction(id: string) {
 
   revalidatePath("/products");
   revalidatePath("/stock");
+  revalidatePath("/dashboard");
 }
 
 export async function activateProductAction(id: string) {
@@ -32,6 +34,7 @@ export async function activateProductAction(id: string) {
 
   revalidatePath("/products");
   revalidatePath("/stock");
+  revalidatePath("/dashboard");
 }
 
 export async function deleteProductAction(id: string) {
@@ -40,4 +43,5 @@ export async function deleteProductAction(id: string) {
 
   revalidatePath("/products");
   revalidatePath("/stock");
+  revalidatePath("/dashboard");
 }

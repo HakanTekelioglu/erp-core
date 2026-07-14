@@ -25,7 +25,7 @@ export default function LoginPage() {
       return;
     }
 
-    toast.success("Giris basarili");
+    toast.success("Giris Basarili");
     router.push("/dashboard");
     router.refresh();
   }

@@ -75,7 +75,8 @@ export async function getDashboardReport() {
     chartSalesInvoices,
     chartExpenses,
     chartPurchaseInvoices,
-    topSalesItems
+    topSalesItems,
+    profitProducts
   ] = await Promise.all([
     prisma.invoice.aggregate({
       _sum: { grandTotal: true },
@@ -113,6 +114,23 @@ export async function getDashboardReport() {
       _sum: { quantity: true },
       orderBy: { _sum: { quantity: "desc" } },
       take: 5
+    }),
+    prisma.product.findMany({
+      where: { isActive: true },
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        unit: true,
+        stockQuantity: true,
+        purchasePrice: true,
+        salePrice: true,
+        salesOrderItems: {
+          where: { salesOrder: { stockPosted: true, status: { not: "CANCELLED" } } },
+          select: { quantity: true, unitPrice: true, unitCost: true, discount: true }
+        }
+      },
+      orderBy: { name: "asc" }
     })
   ]);
 
@@ -126,6 +144,34 @@ export async function getDashboardReport() {
 
   const monthlySales = Number(salesSummary._sum.grandTotal ?? 0);
   const monthlyExpense = Number(expenseSummary._sum.amount ?? 0) + Number(purchaseExpenseSummary._sum.grandTotal ?? 0);
+  const expectedProfitRows = profitProducts
+    .map((product) => {
+      const stock = Number(product.stockQuantity);
+      const purchasePrice = Number(product.purchasePrice);
+      const salePrice = Number(product.salePrice);
+      const stockProfit = (salePrice - purchasePrice) * stock;
+      const realizedProfit = product.salesOrderItems.reduce(
+        (total, item) =>
+          total
+          + Number(item.quantity) * (Number(item.unitPrice) - Number(item.unitCost))
+          - Number(item.discount),
+        0
+      );
+
+      return {
+        id: product.id,
+        code: product.code,
+        name: product.name,
+        unit: product.unit,
+        stock,
+        purchasePrice,
+        salePrice,
+        stockProfit,
+        realizedProfit,
+        totalProfit: stockProfit + realizedProfit
+      };
+    })
+    .sort((first, second) => second.totalProfit - first.totalProfit);
   const monthBuckets = getLastSixMonthBuckets(reportDate);
   const chartData = monthBuckets.map((bucket) => ({
     month: bucket.label,
@@ -153,6 +199,8 @@ export async function getDashboardReport() {
     criticalStockCount: products.filter((product) => product.stockQuantity.lte(product.minimumStockLevel)).length,
     pendingSales,
     unpaidInvoices,
+    expectedProfitTotal: expectedProfitRows.reduce((total, product) => total + product.totalProfit, 0),
+    expectedProfitRows,
     recentSales: recentSales.map((sale) => ({
       id: sale.id,
       orderNumber: sale.orderNumber,

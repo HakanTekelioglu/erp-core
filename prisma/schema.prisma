@@ -218,6 +218,7 @@ model SalesOrderItem {
   productId    String
   quantity     Decimal
   unitPrice    Decimal
+  unitCost     Decimal
   vatRate      Decimal @default(20)
   discount     Decimal @default(0)
   lineTotal    Decimal
