@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/layout/app-shell";
-import { CustomerInvoicesTable, CustomerSalesTable } from "@/components/tables/erp-tables";
+import { CustomerInvoicesTable, CustomerSalesTable } from "@/components/tables/partner-tables";
 import { PageHeader } from "@/components/ui/page-header";
 import { formatMoney } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";

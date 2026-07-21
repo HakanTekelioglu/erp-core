@@ -1,6 +1,6 @@
 import { Boxes } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
-import { StockTable } from "@/components/tables/erp-tables";
+import { StockTable } from "@/components/tables/product-tables";
 import { PageHeader } from "@/components/ui/page-header";
 import { formatNumber } from "@/lib/utils";
 import { listStockSummary } from "@/services/stock-service";

@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
-import { UsersTable } from "@/components/tables/erp-tables";
+import { UsersTable } from "@/components/tables/admin-tables";
 import { PageHeader } from "@/components/ui/page-header";
 import { roleLabels } from "@/lib/permissions";
 import { listUsers } from "@/services/user-service";

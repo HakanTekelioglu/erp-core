@@ -4,7 +4,7 @@ import { InvoicePdfButton } from "@/components/invoices/invoice-pdf-button";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatMoney } from "@/lib/utils";
-import { MoneyTable } from "@/components/tables/erp-tables";
+import { MoneyTable } from "@/components/tables/transaction-tables";
 import { getInvoice } from "@/services/invoice-service";
 
 function formatDate(date: Date | null) {

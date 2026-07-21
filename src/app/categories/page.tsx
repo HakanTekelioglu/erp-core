@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
-import { CategoriesTable } from "@/components/tables/erp-tables";
+import { CategoriesTable } from "@/components/tables/product-tables";
 import { PageHeader } from "@/components/ui/page-header";
 import { listCategories } from "@/services/category-service";
 

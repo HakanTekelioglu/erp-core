@@ -1,40 +1,23 @@
 import { InvoiceType, Prisma, OrderStatus, StockMovementType } from "@prisma/client";
+import { calculateLineTotal, calculateOrderTotals } from "@/domain/orders/order-totals";
 import { prisma } from "@/lib/prisma";
 import type { SalesOrderInput } from "@/lib/validations/sales";
+import { cancelInvoice, createOrderInvoice } from "@/services/invoice-service";
+import { applyStockChanges } from "@/services/stock-service";
 
-function calculateLineTotal(quantity: number, unitPrice: number, vatRate: number, discount = 0) {
-  const subtotal = quantity * unitPrice;
-  const afterDiscount = subtotal - discount;
-  return afterDiscount + afterDiscount * (vatRate / 100);
-}
-
-async function createInvoiceForSalesOrder(tx: Prisma.TransactionClient, order: {
+type SalesOrderForInvoice = {
   id: string;
   customerId: string;
   subtotal: Prisma.Decimal;
   vatTotal: Prisma.Decimal;
   discount: Prisma.Decimal;
   grandTotal: Prisma.Decimal;
-}) {
-  const setting = await tx.companySetting.findFirst();
-  const prefix = setting?.invoicePrefix ?? "SLS";
-  const year = new Date().getFullYear();
-  const invoiceCount = await tx.invoice.count({
-    where: { invoiceNumber: { startsWith: `${prefix}-${year}-` } }
-  });
+};
 
-  return tx.invoice.create({
-    data: {
-      invoiceNumber: `${prefix}-${year}-${String(invoiceCount + 1).padStart(4, "0")}`,
-      type: InvoiceType.SALES,
-      customerId: order.customerId,
-      salesOrderId: order.id,
-      dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-      subtotal: order.subtotal,
-      vatTotal: order.vatTotal,
-      discount: order.discount,
-      grandTotal: order.grandTotal
-    }
+function createInvoiceForSalesOrder(tx: Prisma.TransactionClient, order: SalesOrderForInvoice) {
+  return createOrderInvoice(tx, {
+    type: InvoiceType.SALES,
+    order
   });
 }
 
@@ -63,12 +46,7 @@ export async function createSalesOrder(input: SalesOrderInput, userId?: string) 
     throw new Error("Satis siparisindeki urunlerden biri bulunamadi");
   }
 
-  const subtotal = input.items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
-  const discount = input.items.reduce((sum, item) => sum + item.discount, 0);
-  const vatTotal = input.items.reduce((sum, item) => {
-    const net = item.quantity * item.unitPrice - item.discount;
-    return sum + net * (item.vatRate / 100);
-  }, 0);
+  const totals = calculateOrderTotals(input.items);
 
   return prisma.salesOrder.create({
     data: {
@@ -76,10 +54,7 @@ export async function createSalesOrder(input: SalesOrderInput, userId?: string) 
       customerId: input.customerId,
       userId,
       status: input.status,
-      subtotal,
-      vatTotal,
-      discount,
-      grandTotal: subtotal - discount + vatTotal,
+      ...totals,
       items: {
         create: input.items.map((item) => ({
           productId: item.productId,
@@ -88,7 +63,7 @@ export async function createSalesOrder(input: SalesOrderInput, userId?: string) 
           unitCost: productCosts.get(item.productId)!,
           vatRate: item.vatRate,
           discount: item.discount,
-          lineTotal: calculateLineTotal(item.quantity, item.unitPrice, item.vatRate, item.discount)
+          lineTotal: calculateLineTotal(item)
         }))
       }
     }
@@ -99,7 +74,10 @@ export async function approveSalesOrder(id: string) {
   return prisma.$transaction(async (tx) => {
     const order = await tx.salesOrder.findUnique({
       where: { id },
-      include: { invoice: true, items: { include: { product: true } } }
+      include: {
+        invoice: true,
+        items: { include: { product: { select: { purchasePrice: true } } } }
+      }
     });
     if (!order) throw new Error("Satis siparisi bulunamadi");
     if (order.stockPosted) {
@@ -111,30 +89,22 @@ export async function approveSalesOrder(id: string) {
     }
 
     for (const item of order.items) {
-      if (item.product.stockQuantity.lt(item.quantity)) {
-        throw new Error(`${item.product.name} icin stok yetersiz`);
-      }
-    }
-
-    for (const item of order.items) {
       await tx.salesOrderItem.update({
         where: { id: item.id },
         data: { unitCost: item.product.purchasePrice }
       });
-      await tx.product.update({
-        where: { id: item.productId },
-        data: { stockQuantity: { decrement: item.quantity } }
-      });
-      await tx.stockMovement.create({
-        data: {
-          productId: item.productId,
-          type: StockMovementType.SALE_OUT,
-          quantity: item.quantity,
-          reference: order.orderNumber,
-          note: "Satis onayi ile otomatik stok cikisi"
-        }
-      });
     }
+
+    await applyStockChanges(
+      tx,
+      order.items.map((item) => ({
+        productId: item.productId,
+        type: StockMovementType.SALE_OUT,
+        quantity: item.quantity,
+        reference: order.orderNumber,
+        note: "Satis onayi ile otomatik stok cikisi"
+      }))
+    );
 
     const updatedOrder = await tx.salesOrder.update({
       where: { id },
@@ -160,28 +130,20 @@ export async function cancelSalesOrder(id: string) {
     if (!order) throw new Error("Satis siparisi bulunamadi");
 
     if (order.stockPosted) {
-      for (const item of order.items) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stockQuantity: { increment: item.quantity } }
-        });
-        await tx.stockMovement.create({
-          data: {
-            productId: item.productId,
-            type: StockMovementType.RETURN_IN,
-            quantity: item.quantity,
-            reference: order.orderNumber,
-            note: "Iptal edilen satis icin stok iadesi"
-          }
-        });
-      }
+      await applyStockChanges(
+        tx,
+        order.items.map((item) => ({
+          productId: item.productId,
+          type: StockMovementType.RETURN_IN,
+          quantity: item.quantity,
+          reference: order.orderNumber,
+          note: "Iptal edilen satis icin stok iadesi"
+        }))
+      );
     }
 
     if (order.invoice && order.invoice.status !== "CANCELLED") {
-      await tx.invoice.update({
-        where: { id: order.invoice.id },
-        data: { status: "CANCELLED" }
-      });
+      await cancelInvoice(tx, order.invoice.id);
     }
 
     return tx.salesOrder.update({

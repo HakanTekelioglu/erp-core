@@ -1,6 +1,6 @@
 import { AppShell } from "@/components/layout/app-shell";
 import { PaymentForm } from "@/components/forms/payment-form";
-import { PaymentsTable } from "@/components/tables/erp-tables";
+import { PaymentsTable } from "@/components/tables/transaction-tables";
 import { PageHeader } from "@/components/ui/page-header";
 import { listInvoices } from "@/services/invoice-service";
 import { listPayments } from "@/services/payment-service";

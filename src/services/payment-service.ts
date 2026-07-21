@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { PaymentInput } from "@/lib/validations/payment";
+import { getInvoicePaymentStatus } from "@/services/invoice-service";
 import { InvoiceStatus, InvoiceType, Prisma } from "@prisma/client";
 
 export async function listPayments() {
@@ -39,11 +40,7 @@ export async function createPayment(input: PaymentInput, userId?: string) {
       }
     });
 
-    const status = nextPaidTotal.greaterThanOrEqualTo(invoice.grandTotal)
-      ? InvoiceStatus.PAID
-      : nextPaidTotal.greaterThan(0)
-        ? InvoiceStatus.PARTIALLY_PAID
-        : InvoiceStatus.UNPAID;
+    const status = getInvoicePaymentStatus(nextPaidTotal, invoice.grandTotal);
 
     await tx.invoice.update({
       where: { id: input.invoiceId },

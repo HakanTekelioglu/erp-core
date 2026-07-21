@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { cacheAreas, revalidatePaths } from "@/app/_shared/revalidation";
 import { requirePathAccess } from "@/lib/action-auth";
 import { salesOrderSchema, type SalesOrderInput } from "@/lib/validations/sales";
 import { approveSalesOrder, cancelSalesOrder, createSalesInvoice, createSalesOrder } from "@/services/sales-service";
@@ -14,12 +14,7 @@ export async function createSalesOrderAction(input: SalesOrderInput) {
     await approveSalesOrder(order.id);
   }
 
-  revalidatePath("/sales");
-  revalidatePath("/invoices");
-  revalidatePath("/dashboard");
-  revalidatePath("/reports");
-  revalidatePath("/stock");
-  revalidatePath("/stock/movements");
+  revalidatePaths("/sales", cacheAreas.billing, cacheAreas.overview, cacheAreas.inventory);
 
   return { id: order.id };
 }
@@ -28,37 +23,21 @@ export async function approveSalesOrderAction(id: string) {
   await requirePathAccess("/sales");
   await approveSalesOrder(id);
 
-  revalidatePath("/sales");
-  revalidatePath(`/sales/${id}`);
-  revalidatePath("/invoices");
-  revalidatePath("/dashboard");
-  revalidatePath("/reports");
-  revalidatePath("/stock");
-  revalidatePath("/stock/movements");
+  revalidatePaths("/sales", `/sales/${id}`, cacheAreas.billing, cacheAreas.overview, cacheAreas.inventory);
 }
 
 export async function cancelSalesOrderAction(id: string) {
   await requirePathAccess("/sales");
   await cancelSalesOrder(id);
 
-  revalidatePath("/sales");
-  revalidatePath(`/sales/${id}`);
-  revalidatePath("/invoices");
-  revalidatePath("/dashboard");
-  revalidatePath("/reports");
-  revalidatePath("/stock");
-  revalidatePath("/stock/movements");
+  revalidatePaths("/sales", `/sales/${id}`, cacheAreas.billing, cacheAreas.overview, cacheAreas.inventory);
 }
 
 export async function createSalesInvoiceAction(id: string) {
   await requirePathAccess("/sales");
   const invoice = await createSalesInvoice(id);
 
-  revalidatePath("/sales");
-  revalidatePath(`/sales/${id}`);
-  revalidatePath("/invoices");
-  revalidatePath("/dashboard");
-  revalidatePath("/reports");
+  revalidatePaths("/sales", `/sales/${id}`, cacheAreas.billing, cacheAreas.overview);
 
   return { id: invoice.id };
 }

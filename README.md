@@ -21,9 +21,16 @@ Seed komutunu calistirmadan once `.env` icindeki degerleri degistirin:
 
 ## Mimari
 
-- `src/app`: App Router sayfalari ve route gruplari
-- `src/components`: layout, UI, tablo, form ve grafik bilesenleri
-- `src/lib`: Prisma, auth, yetki, validasyon ve yardimci fonksiyonlar
-- `src/services`: is kurallari ve veri erisim servisleri
+- `src/app`: App Router sayfalari ve ince server action katmani
+- `src/app/_shared`: yalnizca web katmaninin paylastigi cache invalidation gibi altyapi
+- `src/components`: layout, UI, form ve is alanina gore ayrilmis tablo bilesenleri
+- `src/domain`: framework ve veritabanindan bagimsiz saf is kurallari
+- `src/lib`: Prisma, auth, yetki, validasyon ve genel yardimci fonksiyonlar
+- `src/services`: use-case orkestrasyonu, transaction sinirlari ve veri erisimi
 - `prisma`: veri modeli ve demo seed
+
+Bagimlilik yonu sayfa ve action'lardan servislere, servislerden domain/lib katmanina dogrudur.
+Client bilesenleri mutasyonlar icin yalnizca ilgili action'i kullanir; domain katmani ust
+katmanlari import etmez. Fatura ve stok invariantlari kendi servislerinde tutulur; satis ve
+satin alma servisleri bu yetenekleri transaction icinde birlestirir.
 # erp-core

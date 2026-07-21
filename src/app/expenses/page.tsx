@@ -1,6 +1,6 @@
 import { AppShell } from "@/components/layout/app-shell";
 import { ExpenseForm } from "@/components/forms/expense-form";
-import { ExpensesTable } from "@/components/tables/erp-tables";
+import { ExpensesTable } from "@/components/tables/transaction-tables";
 import { PageHeader } from "@/components/ui/page-header";
 import { listExpenseRows } from "@/services/expense-service";
 

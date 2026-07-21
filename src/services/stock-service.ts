@@ -9,7 +9,82 @@ type StockAdjustmentInput = {
   reference?: string;
 };
 
-const inboundTypes: StockMovementType[] = ["PURCHASE_IN", "RETURN_IN", "ADJUSTMENT"];
+export type StockChange = {
+  productId: string;
+  type: StockMovementType;
+  quantity: Prisma.Decimal;
+  note?: string;
+  reference?: string;
+};
+
+const inboundTypes = new Set<StockMovementType>([
+  StockMovementType.PURCHASE_IN,
+  StockMovementType.RETURN_IN,
+  StockMovementType.ADJUSTMENT
+]);
+
+function getSignedQuantity(change: StockChange) {
+  return inboundTypes.has(change.type) ? change.quantity : change.quantity.mul(-1);
+}
+
+export async function applyStockChanges(tx: Prisma.TransactionClient, changes: readonly StockChange[]) {
+  const changesByProduct = new Map<string, Prisma.Decimal>();
+
+  for (const change of changes) {
+    if (!change.quantity.greaterThan(0)) {
+      throw new Error("Stok hareketi miktari sifirdan buyuk olmali");
+    }
+
+    const currentChange = changesByProduct.get(change.productId) ?? new Prisma.Decimal(0);
+    changesByProduct.set(change.productId, currentChange.add(getSignedQuantity(change)));
+  }
+
+  const products = await tx.product.findMany({
+    where: { id: { in: [...changesByProduct.keys()] } },
+    select: { id: true, name: true }
+  });
+  const productsById = new Map(products.map((product) => [product.id, product]));
+
+  for (const [productId, quantityChange] of changesByProduct) {
+    const product = productsById.get(productId);
+    if (!product) throw new Error("Urun bulunamadi");
+
+    if (quantityChange.isNegative()) {
+      const requiredStock = quantityChange.abs();
+      const result = await tx.product.updateMany({
+        where: { id: productId, stockQuantity: { gte: requiredStock } },
+        data: { stockQuantity: { decrement: requiredStock } }
+      });
+
+      if (result.count === 0) {
+        throw new Error(`${product.name} icin stok yetersiz`);
+      }
+    } else if (!quantityChange.isZero()) {
+      await tx.product.update({
+        where: { id: productId },
+        data: { stockQuantity: { increment: quantityChange } }
+      });
+    }
+  }
+
+  const movements = [];
+
+  for (const change of changes) {
+    movements.push(
+      await tx.stockMovement.create({
+        data: {
+          productId: change.productId,
+          type: change.type,
+          quantity: change.quantity,
+          note: change.note,
+          reference: change.reference
+        }
+      })
+    );
+  }
+
+  return movements;
+}
 
 export async function listStockSummary() {
   return prisma.product.findMany({
@@ -38,28 +113,10 @@ export async function getCriticalStockProducts() {
 
 export async function createStockMovement(input: StockAdjustmentInput) {
   const quantity = new Prisma.Decimal(input.quantity);
-  const signedQuantity = inboundTypes.includes(input.type) ? quantity : quantity.mul(-1);
 
   return prisma.$transaction(async (tx) => {
-    const product = await tx.product.findUnique({ where: { id: input.productId } });
-    if (!product) throw new Error("Urun bulunamadi");
+    const [movement] = await applyStockChanges(tx, [{ ...input, quantity }]);
 
-    const nextStock = product.stockQuantity.add(signedQuantity);
-    if (nextStock.lt(0)) throw new Error("Stok miktari negatif olamaz");
-
-    await tx.product.update({
-      where: { id: input.productId },
-      data: { stockQuantity: nextStock }
-    });
-
-    return tx.stockMovement.create({
-      data: {
-        productId: input.productId,
-        type: input.type,
-        quantity,
-        note: input.note,
-        reference: input.reference
-      }
-    });
+    return movement;
   });
 }

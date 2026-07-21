@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import "./globals.css";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
-  title: "Kucuk Isletme ERP Sistemi",
+  title: "MiniERP",
   description: "Kucuk ve orta olcekli isletmeler icin modern ERP paneli"
 };
 

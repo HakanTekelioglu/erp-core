@@ -3,7 +3,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { DashboardCharts } from "@/components/charts/dashboard-charts";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatCard } from "@/components/ui/stat-card";
-import { DashboardExpectedProfitTable, DashboardRecentSalesTable, DashboardTopProductsTable } from "@/components/tables/erp-tables";
+import { DashboardExpectedProfitTable, DashboardRecentSalesTable, DashboardTopProductsTable } from "@/components/tables/dashboard-tables";
 import { formatMoney } from "@/lib/utils";
 import { getDashboardReport } from "@/services/report-service";
 

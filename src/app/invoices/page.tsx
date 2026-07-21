@@ -1,5 +1,5 @@
 import { AppShell } from "@/components/layout/app-shell";
-import { InvoicesTable } from "@/components/tables/erp-tables";
+import { InvoicesTable } from "@/components/tables/transaction-tables";
 import { PageHeader } from "@/components/ui/page-header";
 import { listInvoices } from "@/services/invoice-service";
 

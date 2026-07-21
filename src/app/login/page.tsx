@@ -38,7 +38,7 @@ export default function LoginPage() {
             <Factory className="size-6" aria-hidden />
           </span>
           <div>
-            <h1 className="text-xl font-semibold text-ink">Kucuk Isletme ERP Sistemi</h1>
+            <h1 className="text-xl font-semibold text-ink">miniERP Sistemi</h1>
             <p className="text-sm text-muted">Yetkili kullanici girisi</p>
           </div>
         </div>

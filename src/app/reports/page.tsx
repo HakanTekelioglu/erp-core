@@ -2,7 +2,7 @@ import { AlertTriangle, Banknote, BarChart3, FileWarning, Package, ShoppingCart,
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatCard } from "@/components/ui/stat-card";
-import { ReportsTable } from "@/components/tables/erp-tables";
+import { ReportsTable } from "@/components/tables/admin-tables";
 import { formatMoney } from "@/lib/utils";
 import { getReportsOverview } from "@/services/report-service";
 

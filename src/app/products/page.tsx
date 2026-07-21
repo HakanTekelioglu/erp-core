@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
-import { ProductsTable } from "@/components/tables/erp-tables";
+import { ProductsTable } from "@/components/tables/product-tables";
 import { PageHeader } from "@/components/ui/page-header";
 import { listProducts } from "@/services/product-service";
 
