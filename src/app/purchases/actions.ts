@@ -16,7 +16,7 @@ export async function createPurchaseOrderAction(input: PurchaseOrderInput) {
 }
 
 export async function receivePurchaseOrderAction(id: string) {
-  await requirePathAccess("/purchases");
+  await requirePathAccess("/purchases", id);
   await receivePurchaseOrder(id);
 
   revalidatePaths(
@@ -29,7 +29,7 @@ export async function receivePurchaseOrderAction(id: string) {
 }
 
 export async function cancelPurchaseOrderAction(id: string) {
-  await requirePathAccess("/purchases");
+  await requirePathAccess("/purchases", id);
   await cancelPurchaseOrder(id);
 
   revalidatePaths(
@@ -43,7 +43,7 @@ export async function cancelPurchaseOrderAction(id: string) {
 }
 
 export async function createPurchaseInvoiceAction(id: string) {
-  await requirePathAccess("/purchases");
+  await requirePathAccess("/purchases", id);
   const invoice = await createPurchaseInvoice(id);
 
   revalidatePaths(

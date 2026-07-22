@@ -20,21 +20,21 @@ export async function createSalesOrderAction(input: SalesOrderInput) {
 }
 
 export async function approveSalesOrderAction(id: string) {
-  await requirePathAccess("/sales");
+  await requirePathAccess("/sales", id);
   await approveSalesOrder(id);
 
   revalidatePaths("/sales", `/sales/${id}`, cacheAreas.billing, cacheAreas.overview, cacheAreas.inventory);
 }
 
 export async function cancelSalesOrderAction(id: string) {
-  await requirePathAccess("/sales");
+  await requirePathAccess("/sales", id);
   await cancelSalesOrder(id);
 
   revalidatePaths("/sales", `/sales/${id}`, cacheAreas.billing, cacheAreas.overview, cacheAreas.inventory);
 }
 
 export async function createSalesInvoiceAction(id: string) {
-  await requirePathAccess("/sales");
+  await requirePathAccess("/sales", id);
   const invoice = await createSalesInvoice(id);
 
   revalidatePaths("/sales", `/sales/${id}`, cacheAreas.billing, cacheAreas.overview);

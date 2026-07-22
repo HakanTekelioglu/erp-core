@@ -1,6 +1,8 @@
 import type { Role } from "@prisma/client";
 import { navigationItems } from "@/constants/navigation";
 
+export const REQUEST_PATH_HEADER = "x-mini-erp-pathname";
+
 export const roleLabels: Record<Role, string> = {
   ADMIN: "Admin",
   MANAGER: "Yonetici",
@@ -14,7 +16,7 @@ export function canAccessPath(role: Role, pathname: string) {
     .filter((entry) => pathname === entry.href || pathname.startsWith(`${entry.href}/`))
     .sort((a, b) => b.href.length - a.href.length)[0];
 
-  if (!item) return true;
+  if (!item) return false;
   return item.roles.includes(role);
 }
 

@@ -1,18 +1,26 @@
 import type { Role } from "@prisma/client";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { getCurrentUser } from "@/lib/auth";
+import { canAccessPath, REQUEST_PATH_HEADER } from "@/lib/permissions";
 import { getCompanySettings } from "@/services/settings-service";
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
-  const [session, settings] = await Promise.all([getCurrentUser(), getCompanySettings()]);
+  const session = await getCurrentUser();
 
   if (!session?.user) {
     redirect("/login");
   }
 
   const role = session.user.role as Role;
+  const pathname = (await headers()).get(REQUEST_PATH_HEADER);
+  if (!pathname || !canAccessPath(role, pathname)) {
+    redirect("/dashboard");
+  }
+
+  const settings = await getCompanySettings();
   const userName = session.user.name ?? "Kullanici";
 
   return (

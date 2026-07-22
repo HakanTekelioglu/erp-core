@@ -6,7 +6,7 @@ import { activateSupplier, createSupplier, deactivateSupplier, deleteSupplier } 
 import { supplierSchema, type SupplierInput } from "@/lib/validations/supplier";
 
 export async function createSupplierAction(input: SupplierInput) {
-  await requirePathAccess("/suppliers");
+  await requirePathAccess("/suppliers", id);
   const data = supplierSchema.parse(input);
 
   await createSupplier({
@@ -23,14 +23,14 @@ export async function createSupplierAction(input: SupplierInput) {
 }
 
 export async function deactivateSupplierAction(id: string) {
-  await requirePathAccess("/suppliers");
+  await requirePathAccess("/suppliers", id);
   await deactivateSupplier(id);
 
   revalidatePath("/suppliers");
 }
 
 export async function activateSupplierAction(id: string) {
-  await requirePathAccess("/suppliers");
+  await requirePathAccess("/suppliers", id);
   await activateSupplier(id);
 
   revalidatePath("/suppliers");

@@ -3,10 +3,22 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
+import { clearLoginFailures, isLoginBlocked, recordFailedLogin } from "@/lib/security/login-rate-limit";
 import type { Role } from "@prisma/client";
 
+const DUMMY_PASSWORD_HASH = "$2b$10$KyBdsdvZB24W8SgzetuVbOTMj6KDf8eBH3R0l.i.QHr9g5ggNjrfS";
+const authSecret = process.env.NEXTAUTH_SECRET;
+
+if (
+  process.env.NODE_ENV === "production"
+  && (!authSecret || authSecret.length < 32 || authSecret === "change-this-secret")
+) {
+  throw new Error("NEXTAUTH_SECRET en az 32 karakterlik benzersiz bir deger olmali");
+}
+
 export const authOptions: NextAuthOptions = {
-  session: { strategy: "jwt" },
+  secret: authSecret,
+  session: { strategy: "jwt", maxAge: 8 * 60 * 60 },
   pages: { signIn: "/login" },
   providers: [
     CredentialsProvider({
@@ -15,14 +27,23 @@ export const authOptions: NextAuthOptions = {
         email: { label: "E-posta", type: "email" },
         password: { label: "Sifre", type: "password" }
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         if (!credentials?.email || !credentials.password) return null;
 
-        const user = await prisma.user.findUnique({ where: { email: credentials.email } });
-        if (!user || !user.isActive) return null;
+        const email = credentials.email.trim().toLocaleLowerCase("tr-TR");
+        const password = credentials.password;
+        if (email.length > 254 || Buffer.byteLength(password, "utf8") > 72) return null;
+        if (isLoginBlocked(email, request.headers)) return null;
 
-        const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
-        if (!isValid) return null;
+        const user = await prisma.user.findUnique({ where: { email } });
+        const isValid = await bcrypt.compare(password, user?.passwordHash ?? DUMMY_PASSWORD_HASH);
+
+        if (!user || !user.isActive || !isValid) {
+          recordFailedLogin(email, request.headers);
+          return null;
+        }
+
+        clearLoginFailures(email, request.headers);
 
         return {
           id: user.id,
@@ -51,6 +72,24 @@ export const authOptions: NextAuthOptions = {
   }
 };
 
-export function getCurrentUser() {
-  return getServerSession(authOptions);
+export async function getCurrentUser() {
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
+  if (!session?.user || !userId) return null;
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, name: true, email: true, role: true, isActive: true }
+  });
+  if (!user?.isActive) return null;
+
+  session.user = {
+    ...session.user,
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role
+  };
+
+  return session;
 }

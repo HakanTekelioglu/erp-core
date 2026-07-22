@@ -1,18 +1,25 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 import type { Role } from "@prisma/client";
-import { canAccessPath } from "@/lib/permissions";
+import { canAccessPath, REQUEST_PATH_HEADER } from "@/lib/permissions";
 
 export default withAuth(
   function middleware(request) {
     const role = request.nextauth.token?.role as Role | undefined;
     const pathname = request.nextUrl.pathname;
 
+    if (pathname.startsWith("/login") || pathname.startsWith("/api/auth")) {
+      return NextResponse.next();
+    }
+
     if (role && !canAccessPath(role, pathname)) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
-    return NextResponse.next();
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set(REQUEST_PATH_HEADER, pathname);
+
+    return NextResponse.next({ request: { headers: requestHeaders } });
   },
   {
     callbacks: {

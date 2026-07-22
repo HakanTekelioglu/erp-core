@@ -6,7 +6,7 @@ import { activateCategory, createCategory, deactivateCategory, deleteCategory } 
 import { categorySchema, type CategoryInput } from "@/lib/validations/category";
 
 export async function createCategoryAction(input: CategoryInput) {
-  await requirePathAccess("/categories");
+  await requirePathAccess("/categories", id);
   const data = categorySchema.parse(input);
 
   await createCategory({
@@ -20,7 +20,7 @@ export async function createCategoryAction(input: CategoryInput) {
 }
 
 export async function deactivateCategoryAction(id: string) {
-  await requirePathAccess("/categories");
+  await requirePathAccess("/categories", id);
   await deactivateCategory(id);
 
   revalidatePath("/categories");
@@ -28,7 +28,7 @@ export async function deactivateCategoryAction(id: string) {
 }
 
 export async function activateCategoryAction(id: string) {
-  await requirePathAccess("/categories");
+  await requirePathAccess("/categories", id);
   await activateCategory(id);
 
   revalidatePath("/categories");
