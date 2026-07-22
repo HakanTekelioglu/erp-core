@@ -57,8 +57,8 @@ export function PaymentForm({ invoices }: { invoices: PaymentFormInvoice[] }) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 rounded-lg border border-border bg-white p-5 shadow-sm">
-      <Select label="Fatura" {...register("invoiceId")} error={errors.invoiceId?.message} disabled={invoices.length === 0}>
+    <form onSubmit={handleSubmit(onSubmit)} className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4 rounded-lg border border-border bg-white p-5 shadow-sm">
+      <Select className="min-w-0 w-full" label="Fatura" {...register("invoiceId")} error={errors.invoiceId?.message} disabled={invoices.length === 0}>
         {invoices.length === 0 ? <option value="">Odenecek fatura yok</option> : null}
         {invoices.map((invoice) => (
           <option key={invoice.id} value={invoice.id}>
@@ -66,14 +66,14 @@ export function PaymentForm({ invoices }: { invoices: PaymentFormInvoice[] }) {
           </option>
         ))}
       </Select>
-      <Input label="Tutar" type="number" step="0.01" min="0.01" {...register("amount")} error={errors.amount?.message} disabled={invoices.length === 0} />
-      <Input label="Odeme tarihi" type="date" {...register("paidAt")} error={errors.paidAt?.message} disabled={invoices.length === 0} />
-      <Select label="Odeme yontemi" {...register("method")} error={errors.method?.message} disabled={invoices.length === 0}>
+      <Input className="min-w-0 w-full" label="Tutar" type="number" step="0.01" min="0.01" {...register("amount")} error={errors.amount?.message} disabled={invoices.length === 0} />
+      <Input className="min-w-0 w-full" label="Odeme tarihi" type="date" {...register("paidAt")} error={errors.paidAt?.message} disabled={invoices.length === 0} />
+      <Select className="min-w-0 w-full" label="Odeme yontemi" {...register("method")} error={errors.method?.message} disabled={invoices.length === 0}>
         <option value="CASH">Nakit</option>
         <option value="BANK_TRANSFER">Banka transferi</option>
         <option value="CREDIT_CARD">Kredi karti</option>
       </Select>
-      <Textarea label="Not" {...register("note")} error={errors.note?.message} disabled={invoices.length === 0} />
+      <Textarea className="min-w-0 w-full" label="Not" {...register("note")} error={errors.note?.message} disabled={invoices.length === 0} />
       <Button type="submit" disabled={isSubmitting || invoices.length === 0}>
         <CreditCard className="size-4" aria-hidden />
         Odeme kaydet

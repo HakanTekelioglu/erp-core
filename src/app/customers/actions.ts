@@ -6,7 +6,7 @@ import { activateCustomer, createCustomer, deactivateCustomer, deleteCustomer } 
 import { customerSchema, type CustomerInput } from "@/lib/validations/customer";
 
 export async function createCustomerAction(input: CustomerInput) {
-  await requirePathAccess("/customers", id);
+  await requirePathAccess("/customers");
   const data = customerSchema.parse(input);
 
   await createCustomer({
@@ -38,7 +38,7 @@ export async function activateCustomerAction(id: string) {
 }
 
 export async function deleteCustomerAction(id: string) {
-  await requirePathAccess("/customers");
+  await requirePathAccess("/customers", id);
   await deleteCustomer(id);
 
   revalidatePath("/customers");

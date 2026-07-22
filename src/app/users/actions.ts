@@ -6,7 +6,7 @@ import { activateUser, createUser, deactivateUser } from "@/services/user-servic
 import { userSchema, type UserInput } from "@/lib/validations/user";
 
 export async function createUserAction(input: UserInput) {
-  await requirePathAccess("/users", id);
+  await requirePathAccess("/users");
   const data = userSchema.parse(input);
 
   await createUser({
@@ -26,7 +26,7 @@ export async function deactivateUserAction(id: string) {
 }
 
 export async function activateUserAction(id: string) {
-  await requirePathAccess("/users");
+  await requirePathAccess("/users", id);
   await activateUser(id);
 
   revalidatePath("/users");

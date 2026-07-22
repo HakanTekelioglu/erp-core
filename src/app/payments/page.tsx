@@ -38,7 +38,7 @@ export default async function PaymentsPage() {
   return (
     <AppShell>
       <PageHeader title="Odeme Yonetimi" description="Satin alma faturalarina tam veya parcali odeme kaydi girin; fatura durumu odemelere gore guncellenir." />
-      <div className="grid gap-4 p-4 xl:grid-cols-[380px_1fr]">
+      <div className="grid gap-4 p-4 xl:grid-cols-[380px_minmax(0,1fr)] [&>*]:min-w-0">
         <PaymentForm invoices={payableInvoices} />
         <PaymentsTable rows={paymentRows} />
       </div>

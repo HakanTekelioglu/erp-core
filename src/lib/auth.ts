@@ -32,18 +32,19 @@ export const authOptions: NextAuthOptions = {
 
         const email = credentials.email.trim().toLocaleLowerCase("tr-TR");
         const password = credentials.password;
+        const requestHeaders = request.headers ?? {};
         if (email.length > 254 || Buffer.byteLength(password, "utf8") > 72) return null;
-        if (isLoginBlocked(email, request.headers)) return null;
+        if (isLoginBlocked(email, requestHeaders)) return null;
 
         const user = await prisma.user.findUnique({ where: { email } });
         const isValid = await bcrypt.compare(password, user?.passwordHash ?? DUMMY_PASSWORD_HASH);
 
         if (!user || !user.isActive || !isValid) {
-          recordFailedLogin(email, request.headers);
+          recordFailedLogin(email, requestHeaders);
           return null;
         }
 
-        clearLoginFailures(email, request.headers);
+        clearLoginFailures(email, requestHeaders);
 
         return {
           id: user.id,

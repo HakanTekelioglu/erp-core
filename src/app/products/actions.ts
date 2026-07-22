@@ -6,7 +6,7 @@ import { activateProduct, createProduct, deactivateProduct, deleteProduct } from
 import { productSchema, type ProductInput } from "@/lib/validations/product";
 
 export async function createProductAction(input: ProductInput) {
-  await requirePathAccess("/products", id);
+  await requirePathAccess("/products");
   const data = productSchema.parse(input);
 
   await createProduct({
@@ -38,7 +38,7 @@ export async function activateProductAction(id: string) {
 }
 
 export async function deleteProductAction(id: string) {
-  await requirePathAccess("/products");
+  await requirePathAccess("/products", id);
   await deleteProduct(id);
 
   revalidatePath("/products");
