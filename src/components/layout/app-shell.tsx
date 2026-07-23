@@ -3,8 +3,10 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
+import { ChatDockShell } from "@/components/chat/chat-dock-shell";
 import { getCurrentUser } from "@/lib/auth";
 import { canAccessPath, REQUEST_PATH_HEADER } from "@/lib/permissions";
+import { getChatWorkspace, serializeChatWorkspace } from "@/services/chat-service";
 import { getCompanySettings } from "@/services/settings-service";
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
@@ -20,15 +22,23 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
     redirect("/dashboard");
   }
 
-  const settings = await getCompanySettings();
+  const [settings, chatWorkspace] = await Promise.all([
+    getCompanySettings(),
+    getChatWorkspace({ id: session.user.id, role })
+  ]);
   const userName = session.user.name ?? "Kullanici";
 
   return (
     <div className="min-h-screen bg-background">
       <Sidebar role={role} companyName={settings.companyName} />
       <div className="md:pl-72">
-        <Topbar userName={userName} role={role} />
-        <main className="min-h-[calc(100vh-4rem)]">{children}</main>
+        <ChatDockShell
+          currentUser={{ id: session.user.id, name: userName, role }}
+          initialData={serializeChatWorkspace(chatWorkspace)}
+          topbar={<Topbar userName={userName} role={role} />}
+        >
+          {children}
+        </ChatDockShell>
       </div>
     </div>
   );

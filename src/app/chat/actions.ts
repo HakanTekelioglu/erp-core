@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import {
   channelSchema,
@@ -11,7 +10,9 @@ import {
 import {
   createChannel,
   createDirectConversation,
+  getChatWorkspace,
   markConversationRead,
+  serializeChatWorkspace,
   sendChatMessage
 } from "@/services/chat-service";
 
@@ -24,29 +25,29 @@ async function requireChatUser() {
 export async function createDirectConversationAction(userId: string) {
   const currentUser = await requireChatUser();
   const data = directConversationSchema.parse({ userId });
-  const conversation = await createDirectConversation(currentUser, data.userId);
-  revalidatePath("/chat");
-  return conversation;
+  return createDirectConversation(currentUser, data.userId);
 }
 
 export async function createChannelAction(input: ChannelInput) {
   const currentUser = await requireChatUser();
   const data = channelSchema.parse(input);
-  const conversation = await createChannel(currentUser, data);
-  revalidatePath("/chat");
-  return conversation;
+  return createChannel(currentUser, data);
 }
 
 export async function sendChatMessageAction(conversationId: string, body: string) {
   const currentUser = await requireChatUser();
   const data = chatMessageSchema.parse({ conversationId, body });
   await sendChatMessage(currentUser, data.conversationId, data.body);
-  revalidatePath("/chat");
 }
 
 export async function markConversationReadAction(conversationId: string) {
   const currentUser = await requireChatUser();
   const data = directConversationSchema.parse({ userId: conversationId });
   await markConversationRead(currentUser, data.userId);
-  revalidatePath("/chat");
+}
+
+export async function getChatWorkspaceAction(conversationId?: string) {
+  const currentUser = await requireChatUser();
+  const workspace = await getChatWorkspace(currentUser, conversationId);
+  return serializeChatWorkspace(workspace);
 }

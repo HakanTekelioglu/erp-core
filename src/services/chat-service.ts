@@ -168,6 +168,27 @@ export async function getChatWorkspace(user: ChatUser, requestedConversationId?:
   };
 }
 
+export function serializeChatWorkspace(workspace: Awaited<ReturnType<typeof getChatWorkspace>>) {
+  return {
+    ...workspace,
+    conversations: workspace.conversations.map((conversation) => ({
+      ...conversation,
+      latestMessage: conversation.latestMessage
+        ? {
+            ...conversation.latestMessage,
+            createdAt: conversation.latestMessage.createdAt.toISOString()
+          }
+        : null
+    })),
+    messages: workspace.messages.map((message) => ({
+      ...message,
+      createdAt: message.createdAt.toISOString()
+    }))
+  };
+}
+
+export type SerializedChatWorkspace = ReturnType<typeof serializeChatWorkspace>;
+
 export async function createDirectConversation(currentUser: ChatUser, targetUserId: string) {
   if (currentUser.id === targetUserId) throw new Error("Kendinizle görüşme başlatamazsınız");
 
