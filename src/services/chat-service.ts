@@ -1,5 +1,6 @@
 import type { Prisma, Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { canCreateChatChannel } from "@/lib/permissions";
 
 type ChatUser = {
   id: string;
@@ -227,6 +228,10 @@ export async function createChannel(
     memberIds: string[];
   }
 ) {
+  if (!canCreateChatChannel(currentUser.role)) {
+    throw new Error("Yalnızca yönetici ve admin kullanıcıları kanal oluşturabilir");
+  }
+
   const memberIds = [...new Set([currentUser.id, ...input.memberIds])];
   const validMembers = await prisma.user.findMany({
     where: { id: { in: memberIds }, isActive: true },

@@ -33,7 +33,7 @@ import {
   sendChatMessageAction
 } from "@/app/chat/actions";
 import { Button } from "@/components/ui/button";
-import { roleLabels } from "@/lib/permissions";
+import { canCreateChatChannel, roleLabels } from "@/lib/permissions";
 import type { SerializedChatWorkspace } from "@/services/chat-service";
 import { cn } from "@/lib/utils";
 
@@ -117,6 +117,7 @@ export function ChatDockShell({
   const [channelVisibility, setChannelVisibility] = useState<ChannelVisibility>("company");
   const [channelRole, setChannelRole] = useState<Role>("SALES");
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  const canCreateChannel = canCreateChatChannel(currentUser.role);
 
   const unreadCount = useMemo(
     () => data.conversations.reduce((total, conversation) => total + conversation.unreadCount, 0),
@@ -211,6 +212,12 @@ export function ChatDockShell({
   }
 
   function createChannel() {
+    if (!canCreateChannel) {
+      toast.error("Yalnızca yönetici ve admin kullanıcıları kanal oluşturabilir");
+      setDialog(null);
+      return;
+    }
+
     startTransition(async () => {
       try {
         const conversation = await createChannelAction({
@@ -324,6 +331,7 @@ export function ChatDockShell({
                 onOpenConversation={openConversation}
                 onOpenDirectDialog={() => setDialog("direct")}
                 onOpenChannelDialog={() => setDialog("channel")}
+                canCreateChannel={canCreateChannel}
                 onClose={() => setDockOpen(false)}
               />
             )}
@@ -350,7 +358,7 @@ export function ChatDockShell({
         </button>
       ) : null}
 
-      {dialog ? (
+      {dialog && (dialog !== "channel" || canCreateChannel) ? (
         <ChatDialog
           type={dialog}
           users={data.users}
@@ -382,6 +390,7 @@ function ConversationList({
   onOpenConversation,
   onOpenDirectDialog,
   onOpenChannelDialog,
+  canCreateChannel,
   onClose
 }: {
   conversations: SerializedChatWorkspace["conversations"];
@@ -391,6 +400,7 @@ function ConversationList({
   onOpenConversation: (id: string) => void;
   onOpenDirectDialog: () => void;
   onOpenChannelDialog: () => void;
+  canCreateChannel: boolean;
   onClose: () => void;
 }) {
   return (
@@ -423,15 +433,17 @@ function ConversationList({
             >
               <MessageCircle className="size-3.5" />
             </button>
-            <button
-              type="button"
-              onClick={onOpenChannelDialog}
-              className="inline-flex size-8 items-center justify-center rounded-md bg-brand text-white transition hover:bg-blue-700"
-              aria-label="Yeni kanal"
-              title="Yeni kanal"
-            >
-              <Plus className="size-3.5" />
-            </button>
+            {canCreateChannel ? (
+              <button
+                type="button"
+                onClick={onOpenChannelDialog}
+                className="inline-flex size-8 items-center justify-center rounded-md bg-brand text-white transition hover:bg-blue-700"
+                aria-label="Yeni kanal"
+                title="Yeni kanal"
+              >
+                <Plus className="size-3.5" />
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={onClose}
