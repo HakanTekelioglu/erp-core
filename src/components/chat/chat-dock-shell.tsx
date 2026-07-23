@@ -35,6 +35,7 @@ import {
   sendChatMessageAction
 } from "@/app/chat/actions";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { canCreateChatChannel, roleLabels } from "@/lib/permissions";
 import type { SerializedChatWorkspace } from "@/services/chat-service";
 import { cn } from "@/lib/utils";
@@ -105,12 +106,14 @@ export function ChatDockShell({
   children: ReactNode;
 }) {
   const messageEndRef = useRef<HTMLDivElement>(null);
+  const chatPanelRef = useRef<HTMLElement>(null);
   const [data, setData] = useState(initialData);
   const [isOpen, setIsOpen] = useState(false);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [message, setMessage] = useState("");
   const [dialog, setDialog] = useState<DialogType>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isConversationLoading, setIsConversationLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -188,6 +191,31 @@ export function ChatDockShell({
     messageEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [data.messages, selectedConversation?.id]);
 
+  useEffect(() => {
+    const panel = chatPanelRef.current;
+    if (!panel || !isOpen) return;
+
+    function handlePanelWheel(event: WheelEvent) {
+      const eventTarget = event.target;
+      if (!(eventTarget instanceof Node)) return;
+
+      const nativeScrollable =
+        eventTarget instanceof Element
+          ? eventTarget.closest("[data-chat-native-scroll]")
+          : null;
+      if (nativeScrollable) return;
+
+      const scrollRegion = panel?.querySelector<HTMLElement>("[data-chat-scroll-region]");
+      if (!scrollRegion || scrollRegion.contains(eventTarget) || event.deltaY === 0) return;
+
+      event.preventDefault();
+      scrollRegion.scrollTop += event.deltaY;
+    }
+
+    panel.addEventListener("wheel", handlePanelWheel, { passive: false });
+    return () => panel.removeEventListener("wheel", handlePanelWheel);
+  }, [activeConversationId, isOpen]);
+
   async function openConversation(conversationId: string) {
     setActiveConversationId(conversationId);
     setIsConversationLoading(true);
@@ -261,11 +289,6 @@ export function ChatDockShell({
   function deleteActiveConversation() {
     if (!selectedConversation?.canDelete) return;
 
-    const confirmed = window.confirm(
-      "Bu sohbet ve içindeki tüm mesajlar kalıcı olarak silinecek. Bu işlem geri alınamaz. Devam edilsin mi?"
-    );
-    if (!confirmed) return;
-
     startTransition(async () => {
       try {
         await deleteConversationAction(selectedConversation.id);
@@ -303,7 +326,7 @@ export function ChatDockShell({
       {topbar}
 
       <div className="flex min-h-[calc(100vh-4rem)] items-stretch">
-        <main className="min-w-0 flex-1">{children}</main>
+        <main className="app-content-container min-w-0 flex-1">{children}</main>
 
         {isOpen ? (
           <button
@@ -315,10 +338,11 @@ export function ChatDockShell({
         ) : null}
 
         <aside
+          ref={chatPanelRef}
           aria-label="Mesaj paneli"
           aria-hidden={!isOpen}
           className={cn(
-            "fixed inset-y-0 right-0 top-16 z-40 h-[calc(100vh-4rem)] overflow-hidden border-l border-border bg-white shadow-2xl transition-transform duration-200 md:sticky md:z-10 md:shrink-0 md:translate-x-0 md:shadow-none md:transition-[width] md:duration-200",
+            "fixed inset-y-0 right-0 top-16 z-40 h-[calc(100vh-4rem)] overflow-hidden overscroll-contain border-l border-border/70 bg-panel shadow-[0_18px_50px_rgba(15,23,42,0.12)] transition-transform duration-200 md:sticky md:z-10 md:shrink-0 md:translate-x-0 md:shadow-none md:transition-[width] md:duration-200",
             isOpen
               ? "w-full translate-x-0 sm:w-[420px] md:w-[390px] xl:w-[430px]"
               : "pointer-events-none w-full translate-x-full border-l-0 sm:w-[420px] md:w-0 md:translate-x-0"
@@ -326,7 +350,7 @@ export function ChatDockShell({
         >
           <div
             className={cn(
-              "flex h-full w-full flex-col bg-white transition-opacity sm:w-[420px] md:w-[390px] xl:w-[430px]",
+              "flex h-full w-full flex-col bg-panel transition-opacity sm:w-[420px] md:w-[390px] xl:w-[430px]",
               isOpen ? "opacity-100" : "opacity-0"
             )}
           >
@@ -344,7 +368,7 @@ export function ChatDockShell({
                 onClose={() => setDockOpen(false)}
                 onMessageChange={setMessage}
                 onSend={sendMessage}
-                onDelete={deleteActiveConversation}
+                onDelete={() => setIsDeleteDialogOpen(true)}
               />
             ) : (
               <ConversationList
@@ -367,7 +391,7 @@ export function ChatDockShell({
         <button
           type="button"
           onClick={() => setDockOpen(true)}
-          className="fixed right-0 top-1/2 z-30 flex -translate-y-1/2 flex-col items-center gap-2 rounded-l-lg border border-r-0 border-border bg-white px-2 py-3 text-muted shadow-lg transition hover:bg-blue-50 hover:text-brand"
+          className="fixed right-0 top-1/2 z-30 flex -translate-y-1/2 flex-col items-center gap-2 rounded-l-xl border border-r-0 border-border/70 bg-panel/95 px-2.5 py-3.5 text-muted shadow-[0_10px_30px_rgba(15,23,42,0.1)] backdrop-blur transition hover:bg-brand/10 hover:text-brand"
           aria-label="Mesaj panelini aç"
         >
           <MessageCircle className="size-4" />
@@ -402,6 +426,20 @@ export function ChatDockShell({
           onCreateChannel={createChannel}
         />
       ) : null}
+
+      <ConfirmDialog
+        open={isDeleteDialogOpen && Boolean(selectedConversation?.canDelete)}
+        title="Sohbet silinsin mi?"
+        description="Bu sohbet ve içindeki tüm mesajlar kalıcı olarak silinecek. Bu işlem geri alınamaz."
+        confirmLabel="Sohbeti sil"
+        cancelLabel="Vazgeç"
+        variant="danger"
+        onConfirm={() => {
+          setIsDeleteDialogOpen(false);
+          deleteActiveConversation();
+        }}
+        onCancel={() => setIsDeleteDialogOpen(false)}
+      />
     </ChatDockContext.Provider>
   );
 }
@@ -429,10 +467,10 @@ function ConversationList({
 }) {
   return (
     <>
-      <header className="shrink-0 border-b border-border px-4 py-3">
+      <header className="shrink-0 border-b border-border/70 bg-panel/90 px-4 py-3.5 backdrop-blur-xl">
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="inline-flex size-8 items-center justify-center rounded-lg bg-blue-50 text-brand">
+            <span className="inline-flex size-9 items-center justify-center rounded-xl bg-brand/10 text-brand ring-1 ring-brand/15">
               <MessageCircle className="size-4" />
             </span>
             <div>
@@ -444,14 +482,14 @@ function ConversationList({
                   </span>
                 ) : null}
               </div>
-              <p className="text-[10px] text-muted">Ekip iletişimi</p>
+              <p className="mt-0.5 text-[10px] text-muted">Ekip iletişimi</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
             <button
               type="button"
               onClick={onOpenDirectDialog}
-              className="inline-flex size-8 items-center justify-center rounded-md border border-border text-muted transition hover:bg-slate-50 hover:text-brand"
+              className="inline-flex size-8 items-center justify-center rounded-lg border border-border/70 bg-panel text-muted transition hover:border-brand/30 hover:bg-brand/10 hover:text-brand"
               aria-label="Yeni birebir görüşme"
               title="Yeni birebir görüşme"
             >
@@ -461,7 +499,7 @@ function ConversationList({
               <button
                 type="button"
                 onClick={onOpenChannelDialog}
-                className="inline-flex size-8 items-center justify-center rounded-md bg-brand text-white transition hover:bg-blue-700"
+                className="inline-flex size-8 items-center justify-center rounded-lg bg-brand/90 text-white shadow-sm transition hover:bg-brand"
                 aria-label="Yeni kanal"
                 title="Yeni kanal"
               >
@@ -471,7 +509,7 @@ function ConversationList({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex size-8 items-center justify-center rounded-md text-muted transition hover:bg-slate-100 hover:text-ink"
+              className="inline-flex size-8 items-center justify-center rounded-lg text-muted transition hover:bg-slate-100/80 hover:text-ink"
               aria-label="Mesaj panelini kapat"
             >
               <X className="size-4" />
@@ -484,27 +522,30 @@ function ConversationList({
           <input
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
-            className="min-h-9 w-full rounded-md border border-border bg-slate-50 pl-8 pr-3 text-xs outline-none transition focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/15"
+            className="min-h-10 w-full rounded-xl border border-border/70 bg-background/70 pl-9 pr-3 text-xs outline-none transition placeholder:text-slate-400 focus:border-brand/50 focus:bg-panel focus:ring-4 focus:ring-brand/10"
             placeholder="Konuşmalarda ara"
             aria-label="Konuşmalarda ara"
           />
         </label>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-2">
+      <div
+        data-chat-scroll-region
+        className="chat-list-surface flex-1 overflow-y-auto overscroll-y-contain p-2.5"
+      >
         {conversations.map((conversation) => (
           <button
             key={conversation.id}
             type="button"
             onClick={() => onOpenConversation(conversation.id)}
-            className="mb-1 flex w-full items-start gap-3 rounded-lg px-3 py-3 text-left transition hover:bg-slate-100"
+            className="mb-1.5 flex w-full items-start gap-3 rounded-xl border border-transparent bg-panel/45 px-3 py-3 text-left transition hover:border-border/70 hover:bg-panel hover:shadow-[0_5px_18px_rgba(15,23,42,0.05)]"
           >
             <span
               className={cn(
                 "inline-flex size-9 shrink-0 items-center justify-center text-xs font-semibold",
                 conversation.type === "CHANNEL"
-                  ? "rounded-lg bg-slate-100 text-slate-700"
-                  : "rounded-full bg-blue-50 text-brand"
+                  ? "rounded-xl bg-background text-slate-700 ring-1 ring-border/70"
+                  : "rounded-full bg-brand/10 text-brand ring-1 ring-brand/15"
               )}
             >
               {conversation.type === "CHANNEL" ? (
@@ -589,11 +630,11 @@ function ConversationView({
 }) {
   return (
     <>
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-3">
+      <header className="flex h-16 shrink-0 items-center gap-2 border-b border-border/70 bg-panel/90 px-3 backdrop-blur-xl">
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex size-8 items-center justify-center rounded-md text-muted transition hover:bg-slate-100 hover:text-ink"
+          className="inline-flex size-8 items-center justify-center rounded-lg text-muted transition hover:bg-slate-100/80 hover:text-ink"
           aria-label="Konuşmalara dön"
         >
           <ArrowLeft className="size-4" />
@@ -601,8 +642,8 @@ function ConversationView({
 
         <span
           className={cn(
-            "inline-flex size-8 shrink-0 items-center justify-center bg-slate-100 text-[10px] font-semibold text-slate-700",
-            selectedConversation?.type === "DIRECT" ? "rounded-full" : "rounded-lg"
+            "inline-flex size-9 shrink-0 items-center justify-center bg-background text-[10px] font-semibold text-slate-700 ring-1 ring-border/70",
+            selectedConversation?.type === "DIRECT" ? "rounded-full" : "rounded-xl"
           )}
         >
           {selectedConversation?.type === "CHANNEL" ? (
@@ -630,7 +671,7 @@ function ConversationView({
             type="button"
             onClick={onDelete}
             disabled={isPending}
-            className="inline-flex size-8 items-center justify-center rounded-md text-muted transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex size-8 items-center justify-center rounded-lg text-muted transition hover:bg-red-50/80 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Sohbeti sil"
             title="Sohbeti sil"
           >
@@ -641,14 +682,17 @@ function ConversationView({
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex size-8 items-center justify-center rounded-md text-muted transition hover:bg-slate-100 hover:text-ink"
+          className="inline-flex size-8 items-center justify-center rounded-lg text-muted transition hover:bg-slate-100/80 hover:text-ink"
           aria-label="Mesaj panelini kapat"
         >
           <X className="size-4" />
         </button>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto bg-slate-50/40 px-4 py-4">
+      <div
+        data-chat-scroll-region
+        className="chat-message-surface min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 py-5"
+      >
         {isLoading || !selectedConversation ? (
           <div className="flex h-full items-center justify-center">
             <span className="size-5 animate-spin rounded-full border-2 border-brand/25 border-t-brand" />
@@ -657,7 +701,7 @@ function ConversationView({
           <>
             {!messages.length ? (
               <div className="mx-auto max-w-xs py-16 text-center">
-                <span className="mx-auto mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-blue-50 text-brand">
+                <span className="mx-auto mb-3 inline-flex size-11 items-center justify-center rounded-2xl bg-panel/80 text-brand shadow-sm ring-1 ring-border/70">
                   <MessageCircle className="size-5" />
                 </span>
                 <h3 className="text-xs font-semibold text-ink">İlk mesajı siz gönderin</h3>
@@ -689,7 +733,7 @@ function ConversationView({
                     {grouped ? (
                       <span className="size-7 shrink-0" />
                     ) : (
-                      <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-slate-200 text-[9px] font-semibold text-slate-700">
+                      <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-panel text-[9px] font-semibold text-slate-700 shadow-sm ring-1 ring-border/70">
                         {initials(item.sender.name)}
                       </span>
                     )}
@@ -713,10 +757,10 @@ function ConversationView({
 
                       <div
                         className={cn(
-                          "inline-block whitespace-pre-wrap break-words rounded-xl px-3 py-2 text-left text-xs leading-5",
+                          "inline-block whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2.5 text-left text-xs leading-5 shadow-sm",
                           own
-                            ? "rounded-br-sm bg-brand text-white"
-                            : "rounded-bl-sm border border-border bg-white text-ink"
+                            ? "rounded-br-md bg-[#45658d] text-white"
+                            : "rounded-bl-md border border-border/70 bg-panel/95 text-ink"
                         )}
                       >
                         {item.body}
@@ -741,7 +785,7 @@ function ConversationView({
       </div>
 
       <form
-        className="flex shrink-0 items-end gap-2 border-t border-border bg-white p-3"
+        className="flex shrink-0 items-end gap-2 border-t border-border/70 bg-panel/95 p-3.5 backdrop-blur-xl"
         onSubmit={(event) => {
           event.preventDefault();
           onSend();
@@ -759,14 +803,15 @@ function ConversationView({
           rows={1}
           maxLength={4000}
           disabled={!selectedConversation}
+          data-chat-native-scroll
           placeholder="Mesaj yazın"
-          className="max-h-28 min-h-10 flex-1 resize-none rounded-lg border border-border bg-slate-50 px-3 py-2.5 text-xs outline-none transition focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/15 disabled:opacity-60"
+          className="max-h-28 min-h-11 flex-1 resize-none overscroll-y-contain rounded-xl border border-border/70 bg-background/70 px-3.5 py-3 text-xs outline-none transition placeholder:text-slate-400 focus:border-brand/50 focus:bg-panel focus:ring-4 focus:ring-brand/10 disabled:opacity-60"
           aria-label="Mesaj"
         />
         <button
           type="submit"
           disabled={!message.trim() || isPending || !selectedConversation}
-          className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg bg-brand text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#45658d] text-white shadow-sm transition hover:bg-[#385574] disabled:cursor-not-allowed disabled:opacity-50"
           aria-label="Mesaj gönder"
         >
           <Send className="size-3.5" />

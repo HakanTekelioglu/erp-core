@@ -29,7 +29,7 @@ export default async function ExpensesPage() {
   return (
     <AppShell>
       <PageHeader title="Gider Yonetimi" description="Operasyon, lojistik ve diger isletme giderlerini takip edin." />
-      <div className="grid gap-4 p-4 xl:grid-cols-[380px_1fr]">
+      <div className="expense-layout grid min-w-0 gap-4 p-4 [&>*]:min-w-0">
         <ExpenseForm />
         <ExpensesTable rows={expenseRows} />
       </div>

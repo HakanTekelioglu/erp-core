@@ -43,7 +43,7 @@ export function DataTable<T extends Record<string, unknown>>({
   const paginatedRows = filteredRows.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   return (
-    <div className="rounded-lg border border-border bg-white shadow-sm">
+    <div className="min-w-0 rounded-lg border border-border bg-white shadow-sm">
       <div className="flex flex-col gap-3 border-b border-border p-3 md:flex-row md:items-center md:justify-between">
         <label className="relative block w-full md:max-w-sm">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" aria-hidden />

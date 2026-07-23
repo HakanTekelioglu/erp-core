@@ -47,7 +47,7 @@ export function ExpenseForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 rounded-lg border border-border bg-white p-5 shadow-sm">
+    <form onSubmit={handleSubmit(onSubmit)} className="grid min-w-0 gap-4 rounded-lg border border-border bg-white p-5 shadow-sm">
       <Input label="Gider basligi" {...register("title")} error={errors.title?.message} />
       <Input label="Kategori" {...register("category")} error={errors.category?.message} />
       <Input label="Tutar" type="number" step="0.01" min="0.01" {...register("amount")} error={errors.amount?.message} />

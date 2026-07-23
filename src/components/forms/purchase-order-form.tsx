@@ -61,8 +61,8 @@ export function PurchaseOrderForm({ suppliers, products }: { suppliers: Purchase
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-      <section className="grid gap-4 rounded-lg border border-border bg-white p-5 shadow-sm lg:grid-cols-2">
+    <form onSubmit={handleSubmit(onSubmit)} className="grid min-w-0 gap-4">
+      <section className="order-overview-grid grid min-w-0 gap-4 rounded-lg border border-border bg-white p-5 shadow-sm">
         <Select label="Tedarikci" {...register("supplierId")} error={errors.supplierId?.message}>
           <option value="">Tedarikci secin</option>
           {suppliers.map((supplier) => (
@@ -77,7 +77,7 @@ export function PurchaseOrderForm({ suppliers, products }: { suppliers: Purchase
         </Select>
       </section>
 
-      <section className="rounded-lg border border-border bg-white p-5 shadow-sm">
+      <section className="min-w-0 rounded-lg border border-border bg-white p-5 shadow-sm">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-base font-semibold text-ink">Siparis kalemleri</h2>
           <Button type="button" variant="secondary" onClick={() => append({ productId: "", quantity: 1, unitPrice: 0, vatRate: 20 })}>
@@ -85,7 +85,7 @@ export function PurchaseOrderForm({ suppliers, products }: { suppliers: Purchase
             Kalem ekle
           </Button>
         </div>
-        <div className="mt-4 grid gap-3">
+        <div className="mt-4 grid min-w-0 gap-3">
           {fields.map((field, index) => {
             const productRegistration = register(`items.${index}.productId`, {
               onChange: (event) => {
@@ -98,7 +98,7 @@ export function PurchaseOrderForm({ suppliers, products }: { suppliers: Purchase
             });
 
             return (
-              <div key={field.id} className="grid gap-3 rounded-md border border-border p-3 lg:grid-cols-[1.6fr_0.8fr_0.9fr_0.8fr_auto]">
+              <div key={field.id} className="purchase-order-line-grid grid min-w-0 gap-3 rounded-md border border-border p-3">
                 <Select label="Urun" {...productRegistration} error={errors.items?.[index]?.productId?.message}>
                   <option value="">Urun secin</option>
                   {products.map((product) => (

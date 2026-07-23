@@ -121,6 +121,75 @@ html.dark textarea::placeholder {
   color: rgb(var(--color-muted));
 }
 
+.chat-list-surface {
+  background:
+    linear-gradient(180deg, rgb(248 250 252 / 0.92) 0%, rgb(241 245 249 / 0.72) 100%);
+}
+
+.chat-message-surface {
+  background-color: #f4f7fb;
+  background-image:
+    radial-gradient(circle at 12% 8%, rgb(219 234 254 / 0.38), transparent 34%),
+    radial-gradient(circle at 88% 92%, rgb(226 232 240 / 0.42), transparent 36%);
+}
+
+html.dark .chat-list-surface {
+  background:
+    linear-gradient(180deg, rgb(30 41 59 / 0.96) 0%, rgb(15 23 42 / 0.9) 100%);
+}
+
+html.dark .chat-message-surface {
+  background-color: #111b2e;
+  background-image:
+    radial-gradient(circle at 12% 8%, rgb(30 64 175 / 0.12), transparent 34%),
+    radial-gradient(circle at 88% 92%, rgb(71 85 105 / 0.14), transparent 36%);
+}
+
+.app-content-container {
+  container-name: app-content;
+  container-type: inline-size;
+}
+
+.expense-layout,
+.order-overview-grid,
+.purchase-order-line-grid,
+.sales-order-line-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@container app-content (min-width: 620px) {
+  .order-overview-grid,
+  .purchase-order-line-grid,
+  .sales-order-line-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container app-content (min-width: 980px) {
+  .expense-layout {
+    grid-template-columns: 380px minmax(0, 1fr);
+  }
+
+  .purchase-order-line-grid {
+    grid-template-columns:
+      minmax(0, 1.6fr)
+      minmax(0, 0.8fr)
+      minmax(0, 0.9fr)
+      minmax(0, 0.8fr)
+      auto;
+  }
+
+  .sales-order-line-grid {
+    grid-template-columns:
+      minmax(0, 1.5fr)
+      minmax(0, 0.7fr)
+      minmax(0, 0.8fr)
+      minmax(0, 0.7fr)
+      minmax(0, 0.7fr)
+      auto;
+  }
+}
+
 @media print {
   body * {
     visibility: hidden;
