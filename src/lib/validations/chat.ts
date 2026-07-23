@@ -10,6 +10,8 @@ export const directConversationSchema = z.object({
   userId: z.string().trim().min(1).max(64)
 });
 
+export const conversationIdSchema = z.string().trim().min(1).max(64);
+
 export const channelSchema = z.object({
   name: z.string().trim().min(2, "Kanal adı en az 2 karakter olmalı").max(80),
   description: z.string().trim().max(240).optional(),

@@ -21,6 +21,7 @@ import {
   Plus,
   Search,
   Send,
+  Trash2,
   Users,
   X
 } from "lucide-react";
@@ -28,6 +29,7 @@ import { toast } from "sonner";
 import {
   createChannelAction,
   createDirectConversationAction,
+  deleteConversationAction,
   getChatWorkspaceAction,
   markConversationReadAction,
   sendChatMessageAction
@@ -256,6 +258,27 @@ export function ChatDockShell({
     });
   }
 
+  function deleteActiveConversation() {
+    if (!selectedConversation?.canDelete) return;
+
+    const confirmed = window.confirm(
+      "Bu sohbet ve içindeki tüm mesajlar kalıcı olarak silinecek. Bu işlem geri alınamaz. Devam edilsin mi?"
+    );
+    if (!confirmed) return;
+
+    startTransition(async () => {
+      try {
+        await deleteConversationAction(selectedConversation.id);
+        setActiveConversationId(null);
+        setMessage("");
+        await refreshWorkspace();
+        toast.success("Sohbet silindi");
+      } catch (error) {
+        toast.error(errorMessage(error));
+      }
+    });
+  }
+
   const scopeLabel = selectedConversation
     ? selectedConversation.type === "DIRECT"
       ? roleLabels[
@@ -321,6 +344,7 @@ export function ChatDockShell({
                 onClose={() => setDockOpen(false)}
                 onMessageChange={setMessage}
                 onSend={sendMessage}
+                onDelete={deleteActiveConversation}
               />
             ) : (
               <ConversationList
@@ -546,7 +570,8 @@ function ConversationView({
   onBack,
   onClose,
   onMessageChange,
-  onSend
+  onSend,
+  onDelete
 }: {
   currentUser: CurrentUser;
   selectedConversation: SerializedChatWorkspace["selectedConversation"];
@@ -560,6 +585,7 @@ function ConversationView({
   onClose: () => void;
   onMessageChange: (value: string) => void;
   onSend: () => void;
+  onDelete: () => void;
 }) {
   return (
     <>
@@ -598,6 +624,19 @@ function ConversationView({
           </h2>
           <p className="truncate text-[10px] text-muted">{scopeLabel}</p>
         </div>
+
+        {selectedConversation?.canDelete ? (
+          <button
+            type="button"
+            onClick={onDelete}
+            disabled={isPending}
+            className="inline-flex size-8 items-center justify-center rounded-md text-muted transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label="Sohbeti sil"
+            title="Sohbeti sil"
+          >
+            <Trash2 className="size-4" />
+          </button>
+        ) : null}
 
         <button
           type="button"

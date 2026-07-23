@@ -26,6 +26,19 @@ function conversationAccessWhere(user: ChatUser): Prisma.ChatConversationWhereIn
   };
 }
 
+function canDeleteConversation(
+  user: ChatUser,
+  conversation: {
+    type: "DIRECT" | "CHANNEL";
+    key: string | null;
+    createdById: string;
+  }
+) {
+  if (conversation.key === "global-general") return false;
+  if (conversation.createdById === user.id) return true;
+  return conversation.type === "CHANNEL" && canCreateChatChannel(user.role);
+}
+
 async function ensureGeneralChannel(userId: string) {
   await prisma.chatConversation.upsert({
     where: { key: "global-general" },
@@ -124,6 +137,7 @@ export async function getChatWorkspace(user: ChatUser, requestedConversationId?:
             : conversation.description ?? (conversation.audienceRole ? "Birim kanalı" : "Ortak kanal"),
         audienceRole: conversation.audienceRole,
         isPrivate: conversation.isPrivate,
+        canDelete: canDeleteConversation(user, conversation),
         unreadCount: unreadCounts[index],
         latestMessage: latestMessage
           ? {
@@ -149,6 +163,7 @@ export async function getChatWorkspace(user: ChatUser, requestedConversationId?:
               : selectedConversation.description ?? "",
           audienceRole: selectedConversation.audienceRole,
           isPrivate: selectedConversation.isPrivate,
+          canDelete: canDeleteConversation(user, selectedConversation),
           members: selectedConversation.members
             .filter((member) => member.user.isActive)
             .map((member) => ({
@@ -255,6 +270,30 @@ export async function createChannel(
       }
     },
     select: { id: true }
+  });
+}
+
+export async function deleteConversation(currentUser: ChatUser, conversationId: string) {
+  const conversation = await prisma.chatConversation.findFirst({
+    where: {
+      id: conversationId,
+      ...conversationAccessWhere(currentUser)
+    },
+    select: {
+      id: true,
+      type: true,
+      key: true,
+      createdById: true
+    }
+  });
+
+  if (!conversation) throw new Error("Sohbet bulunamadı veya bu sohbete erişiminiz yok");
+  if (!canDeleteConversation(currentUser, conversation)) {
+    throw new Error("Bu sohbeti silme yetkiniz yok");
+  }
+
+  await prisma.chatConversation.delete({
+    where: { id: conversation.id }
   });
 }
 

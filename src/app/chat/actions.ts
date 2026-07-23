@@ -4,12 +4,14 @@ import { getCurrentUser } from "@/lib/auth";
 import {
   channelSchema,
   chatMessageSchema,
+  conversationIdSchema,
   directConversationSchema,
   type ChannelInput
 } from "@/lib/validations/chat";
 import {
   createChannel,
   createDirectConversation,
+  deleteConversation,
   getChatWorkspace,
   markConversationRead,
   serializeChatWorkspace,
@@ -34,6 +36,12 @@ export async function createChannelAction(input: ChannelInput) {
   return createChannel(currentUser, data);
 }
 
+export async function deleteConversationAction(conversationId: string) {
+  const currentUser = await requireChatUser();
+  const id = conversationIdSchema.parse(conversationId);
+  await deleteConversation(currentUser, id);
+}
+
 export async function sendChatMessageAction(conversationId: string, body: string) {
   const currentUser = await requireChatUser();
   const data = chatMessageSchema.parse({ conversationId, body });
@@ -42,8 +50,8 @@ export async function sendChatMessageAction(conversationId: string, body: string
 
 export async function markConversationReadAction(conversationId: string) {
   const currentUser = await requireChatUser();
-  const data = directConversationSchema.parse({ userId: conversationId });
-  await markConversationRead(currentUser, data.userId);
+  const id = conversationIdSchema.parse(conversationId);
+  await markConversationRead(currentUser, id);
 }
 
 export async function getChatWorkspaceAction(conversationId?: string) {
