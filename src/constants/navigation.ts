@@ -5,6 +5,7 @@ import {
   CreditCard,
   FileText,
   LayoutDashboard,
+  MessageCircle,
   Package,
   ReceiptText,
   Settings,
@@ -27,6 +28,7 @@ const allRoles: Role[] = ["ADMIN", "MANAGER", "SALES", "WAREHOUSE", "ACCOUNTING"
 
 export const navigationItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles:allRoles},
+  { label: "Mesajlar", href: "/chat", icon: MessageCircle, roles: allRoles },
   { label: "Urunler", href: "/products", icon: Package, roles: ["ADMIN", "MANAGER", "WAREHOUSE", "SALES"] },
   { label: "Kategoriler", href: "/categories", icon: Tags, roles: ["ADMIN", "MANAGER", "WAREHOUSE"] },
   { label: "Stok", href: "/stock", icon: Boxes, roles: ["ADMIN", "MANAGER", "WAREHOUSE", "ACCOUNTING"] },

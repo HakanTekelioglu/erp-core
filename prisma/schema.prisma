@@ -68,6 +68,11 @@ enum UnitType {
   PAKET
 }
 
+enum ChatConversationType {
+  DIRECT
+  CHANNEL
+}
+
 model User {
   id           String   @id @default(cuid())
   name         String
@@ -78,10 +83,63 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  salesOrders    SalesOrder[]
-  purchaseOrders PurchaseOrder[]
-  payments       Payment[]
-  expenses       Expense[]
+  salesOrders              SalesOrder[]
+  purchaseOrders           PurchaseOrder[]
+  payments                 Payment[]
+  expenses                 Expense[]
+  createdChatConversations ChatConversation[] @relation("ChatConversationCreator")
+  chatMemberships          ChatParticipant[]
+  chatMessages             ChatMessage[]
+}
+
+model ChatConversation {
+  id            String               @id @default(cuid())
+  type          ChatConversationType
+  key           String?              @unique
+  name          String?
+  description   String?
+  audienceRole  Role?
+  isPrivate     Boolean              @default(false)
+  createdById   String
+  lastMessageAt DateTime?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  createdBy User              @relation("ChatConversationCreator", fields: [createdById], references: [id])
+  members   ChatParticipant[]
+  messages  ChatMessage[]
+
+  @@index([type, isPrivate])
+  @@index([audienceRole])
+  @@index([lastMessageAt])
+}
+
+model ChatParticipant {
+  conversationId String
+  userId         String
+  joinedAt       DateTime @default(now())
+  lastReadAt     DateTime @default(now())
+
+  conversation ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([conversationId, userId])
+  @@index([userId, lastReadAt])
+}
+
+model ChatMessage {
+  id             String    @id @default(cuid())
+  conversationId String
+  senderId       String
+  body           String
+  createdAt      DateTime  @default(now())
+  editedAt       DateTime?
+
+  conversation ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User             @relation(fields: [senderId], references: [id])
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
 }
 
 model CompanySetting {
