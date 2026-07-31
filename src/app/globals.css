@@ -153,11 +153,13 @@ html.dark .chat-message-surface {
 .expense-layout,
 .order-overview-grid,
 .purchase-order-line-grid,
-.sales-order-line-grid {
+.sales-order-line-grid,
+.dashboard-stat-grid {
   grid-template-columns: minmax(0, 1fr);
 }
 
 @container app-content (min-width: 620px) {
+  .dashboard-stat-grid,
   .order-overview-grid,
   .purchase-order-line-grid,
   .sales-order-line-grid {
@@ -187,6 +189,12 @@ html.dark .chat-message-surface {
       minmax(0, 0.7fr)
       minmax(0, 0.7fr)
       auto;
+  }
+}
+
+@container app-content (min-width: 1120px) {
+  .dashboard-stat-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 

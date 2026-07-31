@@ -17,13 +17,13 @@ export function StatCard({
   return (
     <div className="rounded-lg border border-border bg-white p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <p className="text-sm font-medium text-muted">{label}</p>
           <p className="mt-2 text-2xl font-semibold tracking-normal text-ink">{value}</p>
         </div>
         <span
           className={cn(
-            "inline-flex size-10 items-center justify-center rounded-md",
+            "inline-flex size-10 shrink-0 items-center justify-center rounded-md",
             tone === "blue" && "bg-blue-50 text-blue-700",
             tone === "green" && "bg-emerald-50 text-success",
             tone === "amber" && "bg-amber-50 text-warning",

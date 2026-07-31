@@ -13,7 +13,7 @@ export default async function DashboardPage() {
   return (
     <AppShell>
       <PageHeader title="Dashboard" description="Isletmenin satis, gider, stok ve tahsilat durumunu tek ekranda izleyin." />
-      <div className="grid gap-4 p-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="dashboard-stat-grid grid gap-4 p-4">
         <StatCard label="Aylik satis" value={formatMoney(report.monthlySales)} helper={report.monthLabel} icon={TrendingUp} tone="green" />
         <StatCard label="Aylik gider" value={formatMoney(report.monthlyExpense)} helper="Kayitli giderler" icon={Banknote} tone="orange" />
         <StatCard label="Tahmini kar" value={formatMoney(report.estimatedProfit)} helper="Satis eksi gider" icon={TrendingUp} tone="blue" />
