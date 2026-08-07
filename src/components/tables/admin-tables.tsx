@@ -1,6 +1,6 @@
 "use client";
 
-import { activateUserAction, deactivateUserAction } from "@/app/users/actions";
+import { activateUserAction, deactivateUserAction } from "@/app/(erp)/users/actions";
 import { ActiveToggleRowButton } from "@/components/tables/active-toggle-row-button";
 import { DataTable } from "@/components/tables/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";

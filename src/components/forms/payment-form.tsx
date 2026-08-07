@@ -5,7 +5,7 @@ import { CreditCard } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { createPaymentAction } from "@/app/payments/actions";
+import { createPaymentAction } from "@/app/(erp)/payments/actions";
 import { Button } from "@/components/ui/button";
 import { Input, Select, Textarea } from "@/components/ui/input";
 import { paymentSchema, type PaymentActionInput } from "@/lib/validations/payment";

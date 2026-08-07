@@ -5,7 +5,7 @@ import { Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { createCategoryAction } from "@/app/categories/actions";
+import { createCategoryAction } from "@/app/(erp)/categories/actions";
 import { Button } from "@/components/ui/button";
 import { Input, Select, Textarea } from "@/components/ui/input";
 import { categorySchema, type CategoryInput } from "@/lib/validations/category";

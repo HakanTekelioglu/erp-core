@@ -5,7 +5,7 @@ import { Plus, Save, Trash2 } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { createPurchaseOrderAction } from "@/app/purchases/actions";
+import { createPurchaseOrderAction } from "@/app/(erp)/purchases/actions";
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/input";
 import { formatMoney } from "@/lib/utils";

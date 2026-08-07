@@ -1,7 +1,8 @@
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import type { SettingsInput } from "@/lib/validations/settings";
 
-export async function getCompanySettings() {
+export const getCompanySettings = cache(async function getCompanySettings() {
   const setting = await prisma.companySetting.findFirst({
     orderBy: { createdAt: "asc" }
   });
@@ -21,7 +22,7 @@ export async function getCompanySettings() {
       nextInvoiceCounter: 1
     }
   });
-}
+});
 
 export async function updateCompanySettings(input: SettingsInput) {
   const existing = await getCompanySettings();

@@ -5,7 +5,7 @@ import { Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { updateSettingsAction } from "@/app/settings/actions";
+import { updateSettingsAction } from "@/app/(erp)/settings/actions";
 import { Button } from "@/components/ui/button";
 import { Input, Select, Textarea } from "@/components/ui/input";
 import { settingsSchema, type SettingsInput } from "@/lib/validations/settings";

@@ -33,7 +33,7 @@ import {
   getChatWorkspaceAction,
   markConversationReadAction,
   sendChatMessageAction
-} from "@/app/chat/actions";
+} from "@/app/(erp)/chat/actions";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { canCreateChatChannel, roleLabels } from "@/lib/permissions";
@@ -107,6 +107,7 @@ export function ChatDockShell({
 }) {
   const messageEndRef = useRef<HTMLDivElement>(null);
   const chatPanelRef = useRef<HTMLElement>(null);
+  const wasChatOpenRef = useRef(false);
   const [data, setData] = useState(initialData);
   const [isOpen, setIsOpen] = useState(false);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
@@ -166,12 +167,21 @@ export function ChatDockShell({
   }, []);
 
   useEffect(() => {
+    if (!isOpen) {
+      wasChatOpenRef.current = false;
+      return;
+    }
+
+    if (!wasChatOpenRef.current) {
+      wasChatOpenRef.current = true;
+      void refreshWorkspace(activeConversationId ?? undefined).catch(() => undefined);
+    }
     const interval = window.setInterval(() => {
       if (document.visibilityState !== "visible") return;
       void refreshWorkspace(activeConversationId ?? undefined).catch(() => undefined);
-    }, 8000);
+    }, 15000);
     return () => window.clearInterval(interval);
-  }, [activeConversationId, refreshWorkspace]);
+  }, [activeConversationId, isOpen, refreshWorkspace]);
 
   useEffect(() => {
     if (!activeConversationId || !selectedConversation) return;

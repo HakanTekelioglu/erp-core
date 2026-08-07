@@ -1,4 +1,4 @@
-import type { Prisma, Role } from "@prisma/client";
+import { Prisma, type Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { canCreateChatChannel } from "@/lib/permissions";
 
@@ -74,33 +74,41 @@ export async function getChatWorkspace(user: ChatUser, requestedConversationId?:
     }
   });
 
-  if (conversations.length) {
+  const missingMembershipConversationIds = conversations
+    .filter((conversation) => !conversation.members.some((member) => member.userId === user.id))
+    .map((conversation) => conversation.id);
+
+  if (missingMembershipConversationIds.length) {
     await prisma.chatParticipant.createMany({
-      data: conversations.map((conversation) => ({
-        conversationId: conversation.id,
+      data: missingMembershipConversationIds.map((conversationId) => ({
+        conversationId,
         userId: user.id
       })),
       skipDuplicates: true
     });
   }
 
-  const unreadCounts = await Promise.all(
-    conversations.map(async (conversation) => {
-      const membership = conversation.members.find((member) => member.userId === user.id);
-      if (!membership) return 0;
-
-      return prisma.chatMessage.count({
-        where: {
-          conversationId: conversation.id,
-          senderId: { not: user.id },
-          createdAt: { gt: membership.lastReadAt }
-        }
-      });
-    })
+  const unreadCountRows = conversations.length
+    ? await prisma.$queryRaw<Array<{ conversationId: string; count: number }>>(Prisma.sql`
+        SELECT message."conversationId", COUNT(*)::int AS count
+        FROM "ChatMessage" AS message
+        INNER JOIN "ChatParticipant" AS participant
+          ON participant."conversationId" = message."conversationId"
+          AND participant."userId" = ${user.id}
+        WHERE message."conversationId" IN (${Prisma.join(conversations.map(({ id }) => id))})
+          AND message."senderId" <> ${user.id}
+          AND message."createdAt" > participant."lastReadAt"
+        GROUP BY message."conversationId"
+      `)
+    : [];
+  const unreadCountsByConversation = new Map(
+    unreadCountRows.map((row) => [row.conversationId, Number(row.count)])
   );
 
   const selectedConversation =
-    conversations.find((conversation) => conversation.id === requestedConversationId) ?? conversations[0] ?? null;
+    requestedConversationId
+      ? conversations.find((conversation) => conversation.id === requestedConversationId) ?? null
+      : null;
 
   const messages = selectedConversation
     ? await prisma.chatMessage.findMany({
@@ -120,7 +128,7 @@ export async function getChatWorkspace(user: ChatUser, requestedConversationId?:
   });
 
   return {
-    conversations: conversations.map((conversation, index) => {
+    conversations: conversations.map((conversation) => {
       const otherUser =
         conversation.type === "DIRECT"
           ? conversation.members.find((member) => member.userId !== user.id)?.user
@@ -138,7 +146,7 @@ export async function getChatWorkspace(user: ChatUser, requestedConversationId?:
         audienceRole: conversation.audienceRole,
         isPrivate: conversation.isPrivate,
         canDelete: canDeleteConversation(user, conversation),
-        unreadCount: unreadCounts[index],
+        unreadCount: unreadCountsByConversation.get(conversation.id) ?? 0,
         latestMessage: latestMessage
           ? {
               body: latestMessage.body,

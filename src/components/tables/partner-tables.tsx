@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { activateCustomerAction, deactivateCustomerAction, deleteCustomerAction } from "@/app/customers/actions";
-import { activateSupplierAction, deactivateSupplierAction, deleteSupplierAction } from "@/app/suppliers/actions";
+import { activateCustomerAction, deactivateCustomerAction, deleteCustomerAction } from "@/app/(erp)/customers/actions";
+import { activateSupplierAction, deactivateSupplierAction, deleteSupplierAction } from "@/app/(erp)/suppliers/actions";
 import { ActiveToggleRowButton } from "@/components/tables/active-toggle-row-button";
 import { DeleteRowButton } from "@/components/tables/delete-row-button";
 import { DataTable } from "@/components/tables/data-table";

@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import { FileText, RotateCcw, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { approveSalesOrderAction, cancelSalesOrderAction, createSalesInvoiceAction } from "@/app/sales/actions";
+import { approveSalesOrderAction, cancelSalesOrderAction, createSalesInvoiceAction } from "@/app/(erp)/sales/actions";
 import { Button } from "@/components/ui/button";
 
 export function SalesOrderActions({

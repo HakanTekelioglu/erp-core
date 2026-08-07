@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { createExpenseAction } from "@/app/expenses/actions";
+import { createExpenseAction } from "@/app/(erp)/expenses/actions";
 import { Button } from "@/components/ui/button";
 import { Input, Select, Textarea } from "@/components/ui/input";
 import { expenseSchema, type ExpenseActionInput } from "@/lib/validations/expense";
