@@ -10,7 +10,17 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { roleLabels } from "@/lib/permissions";
 
-export function Topbar({ userName, role }: { userName: string; role: Role }) {
+export function Topbar({
+  userName,
+  role,
+  isNavigationOpen,
+  onOpenNavigation
+}: {
+  userName: string;
+  role: Role;
+  isNavigationOpen: boolean;
+  onOpenNavigation: () => void;
+}) {
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
   const { isOpen: isChatOpen, toggle: toggleChat, unreadCount } = useChatDock();
 
@@ -22,8 +32,15 @@ export function Topbar({ userName, role }: { userName: string; role: Role }) {
     <>
       <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-white/95 px-4 backdrop-blur md:px-6">
         <div className="flex items-center gap-3">
-          <button className="inline-flex size-10 items-center justify-center rounded-md border border-border text-muted md:hidden" aria-label="Menu">
-            <Menu className="size-5" />
+          <button
+            type="button"
+            onClick={onOpenNavigation}
+            className="inline-flex size-10 items-center justify-center rounded-md border border-border text-muted transition hover:bg-slate-100 hover:text-ink md:hidden"
+            aria-label="Menüyü aç"
+            aria-controls="primary-navigation"
+            aria-expanded={isNavigationOpen}
+          >
+            <Menu className="size-5" aria-hidden />
           </button>
           <label className="relative hidden w-80 md:block">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" aria-hidden />

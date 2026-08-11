@@ -1,9 +1,7 @@
 import type { Role } from "@prisma/client";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { Sidebar } from "@/components/layout/sidebar";
-import { Topbar } from "@/components/layout/topbar";
-import { ChatDockShell } from "@/components/chat/chat-dock-shell";
+import { NavigationShell } from "@/components/layout/navigation-shell";
 import { getCurrentUser } from "@/lib/auth";
 import { canAccessPath, REQUEST_PATH_HEADER } from "@/lib/permissions";
 import { getChatWorkspace, serializeChatWorkspace } from "@/services/chat-service";
@@ -29,17 +27,14 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
   const userName = session.user.name ?? "Kullanici";
 
   return (
-    <div className="min-h-screen bg-background">
-      <Sidebar role={role} companyName={settings.companyName} />
-      <div className="md:pl-72">
-        <ChatDockShell
-          currentUser={{ id: session.user.id, name: userName, role }}
-          initialData={serializeChatWorkspace(chatWorkspace)}
-          topbar={<Topbar userName={userName} role={role} />}
-        >
-          {children}
-        </ChatDockShell>
-      </div>
-    </div>
+    <NavigationShell
+      role={role}
+      companyName={settings.companyName}
+      userId={session.user.id}
+      userName={userName}
+      initialChatData={serializeChatWorkspace(chatWorkspace)}
+    >
+      {children}
+    </NavigationShell>
   );
 }
