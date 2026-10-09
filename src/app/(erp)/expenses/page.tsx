@@ -1,36 +1,18 @@
 import { ExpenseForm } from "@/components/forms/expense-form";
 import { ExpensesTable } from "@/components/tables/transaction-tables";
 import { PageHeader } from "@/components/ui/page-header";
-import { listExpenseRows } from "@/services/expense-service";
+import { getExpensesPage } from "@/services/list-page-service";
+import { parsePagination, type ListSearchParams } from "@/lib/pagination";
 
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat("tr-TR").format(date);
-}
-
-function formatPaymentMethod(method: string) {
-  if (method === "INVOICE") return "Fatura";
-  if (method === "CASH") return "Nakit";
-  if (method === "CREDIT_CARD") return "Kredi karti";
-  return "Banka transferi";
-}
-
-export default async function ExpensesPage() {
-  const expenses = await listExpenseRows();
-  const expenseRows = expenses.map((expense) => ({
-    id: expense.id,
-    title: expense.title,
-    category: expense.category,
-    date: formatDate(expense.expenseDate),
-    method: formatPaymentMethod(expense.method),
-    amount: Number(expense.amount)
-  }));
+export default async function ExpensesPage({ searchParams }: { searchParams: Promise<ListSearchParams> }) {
+  const { rows: expenseRows, pagination } = await getExpensesPage(parsePagination(await searchParams));
 
   return (
     <>
       <PageHeader title="Gider Yonetimi" description="Operasyon, lojistik ve diger isletme giderlerini takip edin." />
       <div className="expense-layout grid min-w-0 gap-4 p-4 [&>*]:min-w-0">
         <ExpenseForm />
-        <ExpensesTable rows={expenseRows} />
+        <ExpensesTable rows={expenseRows} pagination={pagination} />
       </div>
     </>
   );

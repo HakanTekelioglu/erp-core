@@ -103,12 +103,12 @@ export async function listStockMovements() {
 
 export async function getCriticalStockProducts() {
   const products = await prisma.product.findMany({
-    where: { isActive: true },
+    where: { isActive: true, stockQuantity: { lte: prisma.product.fields.minimumStockLevel } },
     include: { category: true },
     orderBy: { stockQuantity: "asc" }
   });
 
-  return products.filter((product) => product.stockQuantity.lte(product.minimumStockLevel));
+  return products;
 }
 
 export async function createStockMovement(input: StockAdjustmentInput) {

@@ -1,44 +1,15 @@
 import { InvoicesTable } from "@/components/tables/transaction-tables";
 import { PageHeader } from "@/components/ui/page-header";
-import { listInvoices } from "@/services/invoice-service";
+import { getInvoicesPage } from "@/services/list-page-service";
+import { parsePagination, type ListSearchParams } from "@/lib/pagination";
 
-function formatDate(date: Date | null) {
-  if (!date) return "-";
-
-  return new Intl.DateTimeFormat("tr-TR").format(date);
-}
-
-function formatInvoiceType(type: string) {
-  return type === "SALES" ? "Satis" : "Satin Alma";
-}
-
-function formatInvoiceStatus(type: string, status: string) {
-  if (type === "SALES") return status === "CANCELLED" ? "Iptal" : "Satis faturasi";
-  if (status === "PAID") return "Odendi";
-  if (status === "PARTIALLY_PAID") return "Kismi odendi";
-  if (status === "UNPAID") return "Odenmedi";
-  if (status === "CANCELLED") return "Iptal";
-  return status;
-}
-
-export default async function InvoicesPage() {
-  const invoices = await listInvoices();
-  const rows = invoices.map((invoice) => ({
-    id: invoice.id,
-    invoiceNumber: invoice.invoiceNumber,
-    type: formatInvoiceType(invoice.type),
-    party: invoice.customer?.name ?? invoice.supplier?.companyName ?? "-",
-    dueDate: formatDate(invoice.dueDate),
-    status: formatInvoiceStatus(invoice.type, invoice.status),
-    total: Number(invoice.grandTotal),
-    paid: invoice.type === "SALES" ? "-" : Number(invoice.paidTotal)
-  }));
-
+export default async function InvoicesPage({ searchParams }: { searchParams: Promise<ListSearchParams> }) {
+  const { rows, pagination } = await getInvoicesPage(parsePagination(await searchParams));
   return (
     <>
       <PageHeader title="Fatura Yonetimi" description="Satis ve satin alma faturalarini, vade ve odeme durumlarini takip edin." />
       <div className="p-4">
-        <InvoicesTable rows={rows} />
+        <InvoicesTable rows={rows} pagination={pagination} />
       </div>
     </>
   );

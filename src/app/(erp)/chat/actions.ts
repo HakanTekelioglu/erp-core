@@ -13,6 +13,7 @@ import {
   createDirectConversation,
   deleteConversation,
   getChatWorkspace,
+  listChatUsers,
   markConversationRead,
   serializeChatWorkspace,
   sendChatMessage
@@ -54,8 +55,14 @@ export async function markConversationReadAction(conversationId: string) {
   await markConversationRead(currentUser, id);
 }
 
-export async function getChatWorkspaceAction(conversationId?: string) {
+export async function getChatWorkspaceAction(conversationId?: string, afterMessageId?: string) {
   const currentUser = await requireChatUser();
-  const workspace = await getChatWorkspace(currentUser, conversationId);
+  const id = conversationId === undefined ? undefined : conversationIdSchema.parse(conversationId);
+  const cursor = afterMessageId === undefined ? undefined : conversationIdSchema.parse(afterMessageId);
+  const workspace = await getChatWorkspace(currentUser, id, cursor);
   return serializeChatWorkspace(workspace);
+}
+
+export async function getChatUsersAction() {
+  return listChatUsers(await requireChatUser());
 }

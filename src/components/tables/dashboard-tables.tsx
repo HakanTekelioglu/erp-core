@@ -5,6 +5,8 @@ import { DataTable } from "@/components/tables/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatMoney } from "@/lib/utils";
 
+import type { TablePagination } from "@/lib/pagination";
+
 type Row = Record<string, unknown>;
 
 export function DashboardRecentSalesTable({ rows }: { rows: Row[] }) {
@@ -39,10 +41,11 @@ export function DashboardTopProductsTable({ rows }: { rows: Row[] }) {
   );
 }
 
-export function DashboardExpectedProfitTable({ rows }: { rows: Row[] }) {
+export function DashboardExpectedProfitTable({ rows, pagination }: { rows: Row[]; pagination?: TablePagination }) {
   return (
     <DataTable
       rows={rows}
+      pagination={pagination}
       columns={[
         { key: "code", header: "Kod" },
         { key: "name", header: "Urun" },

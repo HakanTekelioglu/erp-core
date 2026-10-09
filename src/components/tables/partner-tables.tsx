@@ -9,12 +9,15 @@ import { DataTable } from "@/components/tables/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatMoney } from "@/lib/utils";
 
+import type { TablePagination } from "@/lib/pagination";
+
 type Row = Record<string, unknown>;
 
-export function CustomersTable({ rows }: { rows: Row[] }) {
+export function CustomersTable({ rows, pagination }: { rows: Row[]; pagination?: TablePagination }) {
   return (
     <DataTable
       rows={rows}
+      pagination={pagination}
       columns={[
         { key: "name", header: "Musteri", render: (row) => <Link className="font-semibold text-brand" href={`/customers/${row.id}`}>{String(row.name)}</Link> },
         { key: "type", header: "Tip" },
@@ -51,10 +54,11 @@ export function CustomersTable({ rows }: { rows: Row[] }) {
   );
 }
 
-export function SuppliersTable({ rows }: { rows: Row[] }) {
+export function SuppliersTable({ rows, pagination }: { rows: Row[]; pagination?: TablePagination }) {
   return (
     <DataTable
       rows={rows}
+      pagination={pagination}
       columns={[
         { key: "companyName", header: "Firma" },
         { key: "contactPerson", header: "Yetkili" },

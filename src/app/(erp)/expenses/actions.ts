@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePaths } from "@/app/_shared/revalidation";
 import { requirePathAccess } from "@/lib/action-auth";
 import { expenseSchema, type ExpenseActionInput } from "@/lib/validations/expense";
 import { createExpense } from "@/services/expense-service";
@@ -18,9 +18,7 @@ export async function createExpenseAction(input: ExpenseActionInput) {
     session?.user?.id
   );
 
-  revalidatePath("/expenses");
-  revalidatePath("/dashboard");
-  revalidatePath("/reports");
+  revalidatePaths("/expenses", "/dashboard", "/reports");
 
   return { id: expense.id };
 }

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { NavigationShell } from "@/components/layout/navigation-shell";
 import { getCurrentUser } from "@/lib/auth";
 import { canAccessPath, REQUEST_PATH_HEADER } from "@/lib/permissions";
-import { getChatWorkspace, serializeChatWorkspace } from "@/services/chat-service";
+import { getChatUnreadCount } from "@/services/chat-service";
 import { getCompanySettings } from "@/services/settings-service";
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
@@ -20,9 +20,9 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
     redirect("/dashboard");
   }
 
-  const [settings, chatWorkspace] = await Promise.all([
+  const [settings, unreadCount] = await Promise.all([
     getCompanySettings(),
-    getChatWorkspace({ id: session.user.id, role })
+    getChatUnreadCount({ id: session.user.id, role })
   ]);
   const userName = session.user.name ?? "Kullanici";
 
@@ -32,7 +32,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       companyName={settings.companyName}
       userId={session.user.id}
       userName={userName}
-      initialChatData={serializeChatWorkspace(chatWorkspace)}
+      initialUnreadCount={unreadCount}
     >
       {children}
     </NavigationShell>

@@ -1,0 +1,816 @@
+{
+  "measuredAt": "2026-10-09T13:39:14.305Z",
+  "method": "Direct service calls against the existing database; first call excluded; 20 sequential warm samples; query duration sum can include parallel queries.",
+  "measurements": [
+    {
+      "name": "dashboard",
+      "p50Ms": 10.5,
+      "p95Ms": 16.23,
+      "queries": 10,
+      "bytes": 2615,
+      "samples": [
+        {
+          "ms": 82.47670000000005,
+          "queries": 10,
+          "sqlMs": 94,
+          "bytes": 2615
+        },
+        {
+          "ms": 19.82140000000004,
+          "queries": 10,
+          "sqlMs": 48,
+          "bytes": 2615
+        },
+        {
+          "ms": 15.958099999999945,
+          "queries": 10,
+          "sqlMs": 39,
+          "bytes": 2615
+        },
+        {
+          "ms": 12.463699999999903,
+          "queries": 10,
+          "sqlMs": 27,
+          "bytes": 2615
+        },
+        {
+          "ms": 14.315899999999942,
+          "queries": 10,
+          "sqlMs": 26,
+          "bytes": 2615
+        },
+        {
+          "ms": 13.154700000000048,
+          "queries": 10,
+          "sqlMs": 21,
+          "bytes": 2615
+        },
+        {
+          "ms": 13.859299999999962,
+          "queries": 10,
+          "sqlMs": 21,
+          "bytes": 2615
+        },
+        {
+          "ms": 15.16960000000006,
+          "queries": 10,
+          "sqlMs": 21,
+          "bytes": 2615
+        },
+        {
+          "ms": 11.473199999999906,
+          "queries": 10,
+          "sqlMs": 13,
+          "bytes": 2615
+        },
+        {
+          "ms": 16.234399999999937,
+          "queries": 10,
+          "sqlMs": 21,
+          "bytes": 2615
+        },
+        {
+          "ms": 12.891999999999939,
+          "queries": 10,
+          "sqlMs": 16,
+          "bytes": 2615
+        },
+        {
+          "ms": 10.46270000000004,
+          "queries": 10,
+          "sqlMs": 10,
+          "bytes": 2615
+        },
+        {
+          "ms": 9.048400000000015,
+          "queries": 10,
+          "sqlMs": 16,
+          "bytes": 2615
+        },
+        {
+          "ms": 8.976400000000012,
+          "queries": 10,
+          "sqlMs": 12,
+          "bytes": 2615
+        },
+        {
+          "ms": 9.403500000000008,
+          "queries": 10,
+          "sqlMs": 12,
+          "bytes": 2615
+        },
+        {
+          "ms": 10.497100000000046,
+          "queries": 10,
+          "sqlMs": 11,
+          "bytes": 2615
+        },
+        {
+          "ms": 9.247299999999996,
+          "queries": 10,
+          "sqlMs": 10,
+          "bytes": 2615
+        },
+        {
+          "ms": 8.21079999999995,
+          "queries": 10,
+          "sqlMs": 11,
+          "bytes": 2615
+        },
+        {
+          "ms": 7.4103999999999814,
+          "queries": 10,
+          "sqlMs": 9,
+          "bytes": 2615
+        },
+        {
+          "ms": 7.433200000000056,
+          "queries": 10,
+          "sqlMs": 8,
+          "bytes": 2615
+        },
+        {
+          "ms": 7.5294999999999845,
+          "queries": 10,
+          "sqlMs": 9,
+          "bytes": 2615
+        }
+      ]
+    },
+    {
+      "name": "reports",
+      "p50Ms": 4.34,
+      "p95Ms": 5.19,
+      "queries": 5,
+      "bytes": 319,
+      "samples": [
+        {
+          "ms": 7.553199999999947,
+          "queries": 5,
+          "sqlMs": 6,
+          "bytes": 319
+        },
+        {
+          "ms": 4.7509000000000015,
+          "queries": 5,
+          "sqlMs": 3,
+          "bytes": 319
+        },
+        {
+          "ms": 5.506900000000087,
+          "queries": 5,
+          "sqlMs": 3,
+          "bytes": 319
+        },
+        {
+          "ms": 5.190200000000004,
+          "queries": 5,
+          "sqlMs": 3,
+          "bytes": 319
+        },
+        {
+          "ms": 4.741799999999898,
+          "queries": 5,
+          "sqlMs": 4,
+          "bytes": 319
+        },
+        {
+          "ms": 4.628399999999942,
+          "queries": 5,
+          "sqlMs": 4,
+          "bytes": 319
+        },
+        {
+          "ms": 4.848100000000045,
+          "queries": 5,
+          "sqlMs": 5,
+          "bytes": 319
+        },
+        {
+          "ms": 4.0978999999999814,
+          "queries": 5,
+          "sqlMs": 2,
+          "bytes": 319
+        },
+        {
+          "ms": 5.101800000000026,
+          "queries": 5,
+          "sqlMs": 5,
+          "bytes": 319
+        },
+        {
+          "ms": 4.339799999999968,
+          "queries": 5,
+          "sqlMs": 3,
+          "bytes": 319
+        },
+        {
+          "ms": 4.169800000000009,
+          "queries": 5,
+          "sqlMs": 3,
+          "bytes": 319
+        },
+        {
+          "ms": 4.845299999999952,
+          "queries": 5,
+          "sqlMs": 5,
+          "bytes": 319
+        },
+        {
+          "ms": 4.680700000000002,
+          "queries": 5,
+          "sqlMs": 3,
+          "bytes": 319
+        },
+        {
+          "ms": 4.1480999999999995,
+          "queries": 5,
+          "sqlMs": 2,
+          "bytes": 319
+        },
+        {
+          "ms": 4.480599999999981,
+          "queries": 5,
+          "sqlMs": 2,
+          "bytes": 319
+        },
+        {
+          "ms": 4.120999999999981,
+          "queries": 5,
+          "sqlMs": 4,
+          "bytes": 319
+        },
+        {
+          "ms": 3.6259999999999764,
+          "queries": 5,
+          "sqlMs": 0,
+          "bytes": 319
+        },
+        {
+          "ms": 3.550700000000006,
+          "queries": 5,
+          "sqlMs": 2,
+          "bytes": 319
+        },
+        {
+          "ms": 4.185000000000059,
+          "queries": 5,
+          "sqlMs": 1,
+          "bytes": 319
+        },
+        {
+          "ms": 4.234300000000076,
+          "queries": 5,
+          "sqlMs": 1,
+          "bytes": 319
+        },
+        {
+          "ms": 4.086000000000013,
+          "queries": 5,
+          "sqlMs": 3,
+          "bytes": 319
+        }
+      ]
+    },
+    {
+      "name": "products",
+      "p50Ms": 2.86,
+      "p95Ms": 3.66,
+      "queries": 2,
+      "bytes": 775,
+      "samples": [
+        {
+          "ms": 10.399800000000027,
+          "queries": 2,
+          "sqlMs": 8,
+          "bytes": 775
+        },
+        {
+          "ms": 3.703300000000013,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 775
+        },
+        {
+          "ms": 3.6504999999999654,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 775
+        },
+        {
+          "ms": 3.352800000000002,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 775
+        },
+        {
+          "ms": 3.523399999999924,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 775
+        },
+        {
+          "ms": 3.6584000000000287,
+          "queries": 2,
+          "sqlMs": 2,
+          "bytes": 775
+        },
+        {
+          "ms": 2.8356999999999744,
+          "queries": 2,
+          "sqlMs": 0,
+          "bytes": 775
+        },
+        {
+          "ms": 2.7824000000000524,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 775
+        },
+        {
+          "ms": 2.846200000000067,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 775
+        },
+        {
+          "ms": 2.854400000000055,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 775
+        },
+        {
+          "ms": 2.810200000000009,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 775
+        },
+        {
+          "ms": 2.862899999999968,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 775
+        },
+        {
+          "ms": 3.0236999999999625,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 775
+        },
+        {
+          "ms": 2.7253999999999223,
+          "queries": 2,
+          "sqlMs": 0,
+          "bytes": 775
+        },
+        {
+          "ms": 3.0539999999999736,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 775
+        },
+        {
+          "ms": 3.2315000000000964,
+          "queries": 2,
+          "sqlMs": 2,
+          "bytes": 775
+        },
+        {
+          "ms": 3.2065999999999804,
+          "queries": 2,
+          "sqlMs": 2,
+          "bytes": 775
+        },
+        {
+          "ms": 2.778799999999933,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 775
+        },
+        {
+          "ms": 2.8228000000000293,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 775
+        },
+        {
+          "ms": 2.833599999999933,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 775
+        },
+        {
+          "ms": 2.904899999999998,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 775
+        }
+      ]
+    },
+    {
+      "name": "sales",
+      "p50Ms": 3.08,
+      "p95Ms": 4.29,
+      "queries": 2,
+      "bytes": 1323,
+      "samples": [
+        {
+          "ms": 6.730599999999981,
+          "queries": 2,
+          "sqlMs": 4,
+          "bytes": 1323
+        },
+        {
+          "ms": 4.285100000000057,
+          "queries": 2,
+          "sqlMs": 2,
+          "bytes": 1323
+        },
+        {
+          "ms": 3.810699999999997,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 1323
+        },
+        {
+          "ms": 3.7211999999999534,
+          "queries": 2,
+          "sqlMs": 2,
+          "bytes": 1323
+        },
+        {
+          "ms": 4.80600000000004,
+          "queries": 2,
+          "sqlMs": 2,
+          "bytes": 1323
+        },
+        {
+          "ms": 4.16190000000006,
+          "queries": 2,
+          "sqlMs": 2,
+          "bytes": 1323
+        },
+        {
+          "ms": 3.0932000000000244,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 1323
+        },
+        {
+          "ms": 2.7937999999999192,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 1323
+        },
+        {
+          "ms": 2.64020000000005,
+          "queries": 2,
+          "sqlMs": 0,
+          "bytes": 1323
+        },
+        {
+          "ms": 2.661399999999958,
+          "queries": 2,
+          "sqlMs": 0,
+          "bytes": 1323
+        },
+        {
+          "ms": 3.0471000000000004,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 1323
+        },
+        {
+          "ms": 3.4576999999999316,
+          "queries": 2,
+          "sqlMs": 2,
+          "bytes": 1323
+        },
+        {
+          "ms": 3.0773999999998978,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 1323
+        },
+        {
+          "ms": 3.1400000000001,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 1323
+        },
+        {
+          "ms": 2.758199999999988,
+          "queries": 2,
+          "sqlMs": 0,
+          "bytes": 1323
+        },
+        {
+          "ms": 3.0202999999999065,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 1323
+        },
+        {
+          "ms": 2.8771999999999025,
+          "queries": 2,
+          "sqlMs": 0,
+          "bytes": 1323
+        },
+        {
+          "ms": 3.4039000000000215,
+          "queries": 2,
+          "sqlMs": 1,
+          "bytes": 1323
+        },
+        {
+          "ms": 3.129000000000133,
+          "queries": 2,
+          "sqlMs": 0,
+          "bytes": 1323
+        },
+        {
+          "ms": 2.753900000000158,
+          "queries": 2,
+          "sqlMs": 0,
+          "bytes": 1323
+        },
+        {
+          "ms": 2.6469999999999345,
+          "queries": 2,
+          "sqlMs": 0,
+          "bytes": 1323
+        }
+      ]
+    },
+    {
+      "name": "chat",
+      "p50Ms": 9.01,
+      "p95Ms": 9.96,
+      "queries": 7,
+      "bytes": 413,
+      "samples": [
+        {
+          "ms": 24.324299999999994,
+          "queries": 7,
+          "sqlMs": 15,
+          "bytes": 413
+        },
+        {
+          "ms": 9.961599999999862,
+          "queries": 7,
+          "sqlMs": 2,
+          "bytes": 413
+        },
+        {
+          "ms": 9.905499999999847,
+          "queries": 7,
+          "sqlMs": 2,
+          "bytes": 413
+        },
+        {
+          "ms": 8.660699999999906,
+          "queries": 7,
+          "sqlMs": 1,
+          "bytes": 413
+        },
+        {
+          "ms": 9.826699999999846,
+          "queries": 7,
+          "sqlMs": 3,
+          "bytes": 413
+        },
+        {
+          "ms": 10.128199999999879,
+          "queries": 7,
+          "sqlMs": 2,
+          "bytes": 413
+        },
+        {
+          "ms": 9.048199999999952,
+          "queries": 7,
+          "sqlMs": 1,
+          "bytes": 413
+        },
+        {
+          "ms": 8.197099999999864,
+          "queries": 7,
+          "sqlMs": 0,
+          "bytes": 413
+        },
+        {
+          "ms": 8.617799999999988,
+          "queries": 7,
+          "sqlMs": 0,
+          "bytes": 413
+        },
+        {
+          "ms": 8.904399999999896,
+          "queries": 7,
+          "sqlMs": 0,
+          "bytes": 413
+        },
+        {
+          "ms": 9.894199999999955,
+          "queries": 7,
+          "sqlMs": 2,
+          "bytes": 413
+        },
+        {
+          "ms": 7.946300000000065,
+          "queries": 7,
+          "sqlMs": 0,
+          "bytes": 413
+        },
+        {
+          "ms": 9.302599999999984,
+          "queries": 7,
+          "sqlMs": 2,
+          "bytes": 413
+        },
+        {
+          "ms": 9.114100000000008,
+          "queries": 7,
+          "sqlMs": 1,
+          "bytes": 413
+        },
+        {
+          "ms": 8.177800000000161,
+          "queries": 7,
+          "sqlMs": 0,
+          "bytes": 413
+        },
+        {
+          "ms": 9.223000000000184,
+          "queries": 7,
+          "sqlMs": 1,
+          "bytes": 413
+        },
+        {
+          "ms": 8.782899999999927,
+          "queries": 7,
+          "sqlMs": 0,
+          "bytes": 413
+        },
+        {
+          "ms": 9.000699999999824,
+          "queries": 7,
+          "sqlMs": 1,
+          "bytes": 413
+        },
+        {
+          "ms": 8.410900000000083,
+          "queries": 7,
+          "sqlMs": 1,
+          "bytes": 413
+        },
+        {
+          "ms": 9.093600000000151,
+          "queries": 7,
+          "sqlMs": 2,
+          "bytes": 413
+        },
+        {
+          "ms": 9.012299999999868,
+          "queries": 7,
+          "sqlMs": 1,
+          "bytes": 413
+        }
+      ]
+    },
+    {
+      "name": "chatSummary",
+      "p50Ms": 1.24,
+      "p95Ms": 1.7,
+      "queries": 1,
+      "bytes": 1,
+      "samples": [
+        {
+          "ms": 3.297900000000027,
+          "queries": 1,
+          "sqlMs": 2,
+          "bytes": 1
+        },
+        {
+          "ms": 1.7000000000000455,
+          "queries": 1,
+          "sqlMs": 1,
+          "bytes": 1
+        },
+        {
+          "ms": 1.2785999999998694,
+          "queries": 1,
+          "sqlMs": 0,
+          "bytes": 1
+        },
+        {
+          "ms": 1.6700000000000728,
+          "queries": 1,
+          "sqlMs": 1,
+          "bytes": 1
+        },
+        {
+          "ms": 1.2972999999999502,
+          "queries": 1,
+          "sqlMs": 0,
+          "bytes": 1
+        },
+        {
+          "ms": 1.2386999999998807,
+          "queries": 1,
+          "sqlMs": 0,
+          "bytes": 1
+        },
+        {
+          "ms": 1.2911999999998898,
+          "queries": 1,
+          "sqlMs": 0,
+          "bytes": 1
+        },
+        {
+          "ms": 0.9954999999999927,
+          "queries": 1,
+          "sqlMs": 0,
+          "bytes": 1
+        },
+        {
+          "ms": 1.0047000000001844,
+          "queries": 1,
+          "sqlMs": 0,
+          "bytes": 1
+        },
+        {
+          "ms": 1.878400000000056,
+          "queries": 1,
+          "sqlMs": 1,
+          "bytes": 1
+        },
+        {
+          "ms": 1.2075999999999567,
+          "queries": 1,
+          "sqlMs": 0,
+          "bytes": 1
+        },
+        {
+          "ms": 1.3648000000000593,
+          "queries": 1,
+          "sqlMs": 0,
+          "bytes": 1
+        },
+        {
+          "ms": 0.929300000000012,
+          "queries": 1,
+          "sqlMs": 0,
+          "bytes": 1
+        },
+        {
+          "ms": 0.8977999999999611,
+          "queries": 1,
+          "sqlMs": 0,
+          "bytes": 1
+        },
+        {
+          "ms": 1.2445000000000164,
+          "queries": 1,
+          "sqlMs": 0,
+          "bytes": 1
+        },
+        {
+          "ms": 0.9775999999999385,
+          "queries": 1,
+          "sqlMs": 0,
+          "bytes": 1
+        },
+        {
+          "ms": 0.9216000000001259,
+          "queries": 1,
+          "sqlMs": 0,
+          "bytes": 1
+        },
+        {
+          "ms": 1.2777000000000953,
+          "queries": 1,
+          "sqlMs": 0,
+          "bytes": 1
+        },
+        {
+          "ms": 1.0691999999999098,
+          "queries": 1,
+          "sqlMs": 0,
+          "bytes": 1
+        },
+        {
+          "ms": 1.1303000000000338,
+          "queries": 1,
+          "sqlMs": 0,
+          "bytes": 1
+        },
+        {
+          "ms": 1.6862999999998465,
+          "queries": 1,
+          "sqlMs": 1,
+          "bytes": 1
+        }
+      ]
+    }
+  ]
+}

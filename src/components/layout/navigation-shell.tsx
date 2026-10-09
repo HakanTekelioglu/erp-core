@@ -6,7 +6,6 @@ import { ChatDockShell } from "@/components/chat/chat-dock-shell";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { cn } from "@/lib/utils";
-import type { SerializedChatWorkspace } from "@/services/chat-service";
 
 const SIDEBAR_STORAGE_KEY = "mini-erp-sidebar-collapsed";
 
@@ -15,14 +14,14 @@ export function NavigationShell({
   companyName,
   userId,
   userName,
-  initialChatData,
+  initialUnreadCount,
   children
 }: {
   role: Role;
   companyName: string;
   userId: string;
   userName: string;
-  initialChatData: SerializedChatWorkspace;
+  initialUnreadCount: number;
   children: ReactNode;
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -83,7 +82,7 @@ export function NavigationShell({
       >
         <ChatDockShell
           currentUser={{ id: userId, name: userName, role }}
-          initialData={initialChatData}
+          initialUnreadCount={initialUnreadCount}
           topbar={
             <Topbar
               userName={userName}

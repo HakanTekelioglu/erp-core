@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePaths, cacheAreas } from "@/app/_shared/revalidation";
 import { requirePathAccess } from "@/lib/action-auth";
 import { paymentSchema, type PaymentActionInput } from "@/lib/validations/payment";
 import { createPayment } from "@/services/payment-service";
@@ -16,9 +16,7 @@ export async function createPaymentAction(input: PaymentActionInput) {
     session?.user?.id
   );
 
-  revalidatePath("/payments");
-  revalidatePath("/invoices");
-  revalidatePath(`/invoices/${data.invoiceId}`);
+  revalidatePaths("/payments", cacheAreas.overview, "/invoices", `/invoices/${data.invoiceId}`);
 
   return { id: payment.id };
 }

@@ -29,6 +29,7 @@ pnpm-debug.log*
 .codex/
 .vscode/
 .idea/
+.performance/
 
 # OS files
 .DS_Store

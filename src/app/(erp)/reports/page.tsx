@@ -3,14 +3,14 @@ import { PageHeader } from "@/components/ui/page-header";
 import { StatCard } from "@/components/ui/stat-card";
 import { ReportsTable } from "@/components/tables/admin-tables";
 import { formatMoney } from "@/lib/utils";
-import { getReportsOverview } from "@/services/report-service";
+import { getCachedReportsOverview } from "@/services/report-cache";
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("tr-TR").format(date);
 }
 
 export default async function ReportsPage() {
-  const report = await getReportsOverview();
+  const report = await getCachedReportsOverview();
   const lastUpdated = formatDate(new Date());
   const reports = [
     { id: "monthly-sales", name: "Aylik satis raporu", owner: "Satis", value: formatMoney(report.monthlySales), updatedAt: lastUpdated, status: "Aktif" },

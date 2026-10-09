@@ -107,6 +107,14 @@ export async function listInvoices() {
   });
 }
 
+export async function listPayableInvoiceOptions() {
+  return prisma.invoice.findMany({
+    where: { type: "PURCHASE", status: { in: ["UNPAID", "PARTIALLY_PAID"] }, grandTotal: { gt: prisma.invoice.fields.paidTotal } },
+    select: { id: true, invoiceNumber: true, grandTotal: true, paidTotal: true, supplier: { select: { companyName: true } } },
+    orderBy: [{ invoiceDate: "desc" }, { id: "desc" }]
+  });
+}
+
 export async function getInvoice(id: string) {
   return prisma.invoice.findUnique({
     where: { id },

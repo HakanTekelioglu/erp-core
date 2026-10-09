@@ -1,37 +1,16 @@
 import { PaymentForm } from "@/components/forms/payment-form";
 import { PaymentsTable } from "@/components/tables/transaction-tables";
 import { PageHeader } from "@/components/ui/page-header";
-import { listInvoices } from "@/services/invoice-service";
-import { listPayments } from "@/services/payment-service";
+import { listPayableInvoiceOptions } from "@/services/invoice-service";
+import { getPaymentsPage } from "@/services/list-page-service";
+import { parsePagination, type ListSearchParams } from "@/lib/pagination";
 
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat("tr-TR").format(date);
-}
-
-function formatPaymentMethod(method: string) {
-  if (method === "CASH") return "Nakit";
-  if (method === "CREDIT_CARD") return "Kredi karti";
-  return "Banka transferi";
-}
-
-export default async function PaymentsPage() {
-  const [invoices, payments] = await Promise.all([listInvoices(), listPayments()]);
-  const payableInvoices = invoices
-    .filter((invoice) => invoice.type === "PURCHASE" && invoice.status !== "PAID" && invoice.status !== "CANCELLED")
-    .map((invoice) => ({
-      id: invoice.id,
-      invoiceNumber: invoice.invoiceNumber,
-      party: invoice.supplier?.companyName ?? "-",
-      remaining: Number(invoice.grandTotal.sub(invoice.paidTotal))
-    }))
-    .filter((invoice) => invoice.remaining > 0);
-  const paymentRows = payments.map((payment) => ({
-    id: payment.id,
-    invoiceNumber: payment.invoice.invoiceNumber,
-    party: payment.invoice.supplier?.companyName ?? "-",
-    date: formatDate(payment.paidAt),
-    method: formatPaymentMethod(payment.method),
-    amount: Number(payment.amount)
+export default async function PaymentsPage({ searchParams }: { searchParams: Promise<ListSearchParams> }) {
+  const request = parsePagination(await searchParams);
+  const [invoices, { rows: paymentRows, pagination }] = await Promise.all([listPayableInvoiceOptions(), getPaymentsPage(request)]);
+  const payableInvoices = invoices.map(invoice => ({
+    id: invoice.id, invoiceNumber: invoice.invoiceNumber, party: invoice.supplier?.companyName ?? "-",
+    remaining: Number(invoice.grandTotal.sub(invoice.paidTotal))
   }));
 
   return (
@@ -39,7 +18,7 @@ export default async function PaymentsPage() {
       <PageHeader title="Odeme Yonetimi" description="Satin alma faturalarina tam veya parcali odeme kaydi girin; fatura durumu odemelere gore guncellenir." />
       <div className="grid gap-4 p-4 xl:grid-cols-[380px_minmax(0,1fr)] [&>*]:min-w-0">
         <PaymentForm invoices={payableInvoices} />
-        <PaymentsTable rows={paymentRows} />
+        <PaymentsTable rows={paymentRows} pagination={pagination} />
       </div>
     </>
   );

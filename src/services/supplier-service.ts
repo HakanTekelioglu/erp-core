@@ -1,6 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import type { SupplierInput } from "@/lib/validations/supplier";
 
+export async function listSupplierOptions() {
+  return prisma.supplier.findMany({ where: { isActive: true }, select: { id: true, companyName: true }, orderBy: [{ createdAt: "desc" }, { id: "desc" }] });
+}
+
 export async function listSuppliers() {
   return prisma.supplier.findMany({
     include: { _count: { select: { purchaseOrders: true, invoices: true } } },

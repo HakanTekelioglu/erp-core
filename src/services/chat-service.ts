@@ -40,6 +40,7 @@ function canDeleteConversation(
 }
 
 async function ensureGeneralChannel(userId: string) {
+  if (await prisma.chatConversation.findUnique({ where: { key: "global-general" }, select: { id: true } })) return;
   await prisma.chatConversation.upsert({
     where: { key: "global-general" },
     update: {},
@@ -54,7 +55,7 @@ async function ensureGeneralChannel(userId: string) {
   });
 }
 
-export async function getChatWorkspace(user: ChatUser, requestedConversationId?: string) {
+export async function getChatWorkspace(user: ChatUser, requestedConversationId?: string, afterMessageId?: string) {
   await ensureGeneralChannel(user.id);
 
   const conversations = await prisma.chatConversation.findMany({
@@ -110,24 +111,22 @@ export async function getChatWorkspace(user: ChatUser, requestedConversationId?:
       ? conversations.find((conversation) => conversation.id === requestedConversationId) ?? null
       : null;
 
+  const cursor = selectedConversation && afterMessageId
+    ? await prisma.chatMessage.findFirst({ where: { id: afterMessageId, conversationId: selectedConversation.id }, select: { id: true, createdAt: true } })
+    : null;
   const messages = selectedConversation
     ? await prisma.chatMessage.findMany({
-        where: { conversationId: selectedConversation.id },
-        orderBy: { createdAt: "desc" },
-        take: 100,
+        where: { conversationId: selectedConversation.id, ...(cursor ? { OR: [{ createdAt: { gt: cursor.createdAt } }, { createdAt: cursor.createdAt, id: { gt: cursor.id } }] } : {}) },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: 101,
         include: {
           sender: { select: { id: true, name: true, role: true } }
         }
       })
     : [];
 
-  const users = await prisma.user.findMany({
-    where: { isActive: true, id: { not: user.id } },
-    orderBy: { name: "asc" },
-    select: { id: true, name: true, email: true, role: true }
-  });
-
   return {
+    messagesMode: cursor && messages.length <= 100 ? "append" as const : "replace" as const,
     conversations: conversations.map((conversation) => {
       const otherUser =
         conversation.type === "DIRECT"
@@ -182,14 +181,27 @@ export async function getChatWorkspace(user: ChatUser, requestedConversationId?:
             }))
         }
       : null,
-    messages: messages.reverse().map((message) => ({
+    messages: messages.slice(0, 100).reverse().map((message) => ({
       id: message.id,
       body: message.body,
       createdAt: message.createdAt,
       sender: message.sender
     })),
-    users
+    users: [] as Array<{ id: string; name: string; email: string; role: Role }>
   };
+}
+
+export async function listChatUsers(user: ChatUser) {
+  return prisma.user.findMany({ where: { isActive: true, id: { not: user.id } }, orderBy: { name: "asc" }, select: { id: true, name: true, email: true, role: true } });
+}
+
+export async function getChatUnreadCount(user: ChatUser) {
+  const [result] = await prisma.$queryRaw<Array<{ count: number }>>(Prisma.sql`
+    SELECT count(*)::int AS count FROM "ChatMessage" m
+    JOIN "ChatParticipant" p ON p."conversationId" = m."conversationId" AND p."userId" = ${user.id}
+    WHERE m."senderId" <> ${user.id} AND m."createdAt" > p."lastReadAt"
+  `);
+  return result.count;
 }
 
 export function serializeChatWorkspace(workspace: Awaited<ReturnType<typeof getChatWorkspace>>) {

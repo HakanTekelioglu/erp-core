@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { clearLoginFailures, isLoginBlocked, recordFailedLogin } from "@/lib/security/login-rate-limit";
 import type { Role } from "@prisma/client";
+import { cache } from "react";
 
 const DUMMY_PASSWORD_HASH = "$2b$10$KyBdsdvZB24W8SgzetuVbOTMj6KDf8eBH3R0l.i.QHr9g5ggNjrfS";
 const authSecret = process.env.NEXTAUTH_SECRET;
@@ -73,7 +74,7 @@ export const authOptions: NextAuthOptions = {
   }
 };
 
-export async function getCurrentUser() {
+export const getCurrentUser = cache(async function getCurrentUser() {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
   if (!session?.user || !userId) return null;
@@ -93,4 +94,4 @@ export async function getCurrentUser() {
   };
 
   return session;
-}
+});

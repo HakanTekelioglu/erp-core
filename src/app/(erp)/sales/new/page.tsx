@@ -1,15 +1,13 @@
 import { SalesOrderForm } from "@/components/forms/sales-order-form";
 import { PageHeader } from "@/components/ui/page-header";
-import { listCustomers } from "@/services/customer-service";
-import { listProducts } from "@/services/product-service";
+import { listCustomerOptions } from "@/services/customer-service";
+import { listProductOptions } from "@/services/product-service";
 
 export default async function NewSalePage() {
-  const [customers, products] = await Promise.all([listCustomers(), listProducts()]);
+  const [customers, products] = await Promise.all([listCustomerOptions(), listProductOptions()]);
   const customerOptions = customers
-    .filter((customer) => customer.isActive)
     .map((customer) => ({ id: customer.id, name: customer.name }));
   const productOptions = products
-    .filter((product) => product.isActive)
     .map((product) => ({
       id: product.id,
       name: product.name,

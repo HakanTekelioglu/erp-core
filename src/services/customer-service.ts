@@ -1,6 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import type { CustomerInput } from "@/lib/validations/customer";
 
+export async function listCustomerOptions() {
+  return prisma.customer.findMany({ where: { isActive: true }, select: { id: true, name: true }, orderBy: [{ createdAt: "desc" }, { id: "desc" }] });
+}
+
 export async function listCustomers() {
   return prisma.customer.findMany({
     include: { _count: { select: { salesOrders: true, invoices: true } } },

@@ -1,4 +1,5 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { REPORT_CACHE_TAG } from "@/services/report-cache";
 
 export const cacheAreas = {
   billing: ["/invoices"],
@@ -20,4 +21,5 @@ export function revalidatePaths(...targets: RevalidationTarget[]) {
   for (const path of paths) {
     revalidatePath(path);
   }
+  if (paths.has("/dashboard") || paths.has("/reports")) revalidateTag(REPORT_CACHE_TAG);
 }

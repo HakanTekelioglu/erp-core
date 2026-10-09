@@ -1,27 +1,16 @@
 import { Plus } from "lucide-react";
 import { ProductsTable } from "@/components/tables/product-tables";
 import { PageHeader } from "@/components/ui/page-header";
-import { listProducts } from "@/services/product-service";
+import { getProductsPage } from "@/services/list-page-service";
+import { parsePagination, type ListSearchParams } from "@/lib/pagination";
 
-export default async function ProductsPage() {
-  const products = await listProducts();
-  const rows = products.map((product) => ({
-    id: product.id,
-    code: product.code,
-    name: product.name,
-    category: product.category.name,
-    stock: Number(product.stockQuantity),
-    unit: product.unit,
-    salePrice: Number(product.salePrice),
-    status: product.isActive ? "Aktif" : "Pasif",
-    usageCount: product._count.stockMovements + product._count.salesOrderItems + product._count.purchaseOrderItems
-  }));
-
+export default async function ProductsPage({ searchParams }: { searchParams: Promise<ListSearchParams> }) {
+  const { rows, pagination } = await getProductsPage(parsePagination(await searchParams));
   return (
     <>
       <PageHeader title="Urun Yonetimi" description="Urun, fiyat, KDV, birim ve minimum stok seviyelerini yonetin." action={{ label: "Yeni urun", href: "/products/new", icon: Plus }} />
       <div className="p-4">
-        <ProductsTable rows={rows} />
+        <ProductsTable rows={rows} pagination={pagination} />
       </div>
     </>
   );

@@ -1,13 +1,14 @@
 import { AlertTriangle, Banknote, FileWarning, Package, ShoppingCart, TrendingUp, Users } from "lucide-react";
-import { DashboardCharts } from "@/components/charts/dashboard-charts";
+import { DashboardChartsLazy } from "@/components/charts/dashboard-charts-lazy";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatCard } from "@/components/ui/stat-card";
 import { DashboardExpectedProfitTable, DashboardRecentSalesTable, DashboardTopProductsTable } from "@/components/tables/dashboard-tables";
 import { formatMoney } from "@/lib/utils";
-import { getDashboardReport } from "@/services/report-service";
+import { getCachedDashboardReport } from "@/services/report-cache";
+import { parsePagination, type ListSearchParams } from "@/lib/pagination";
 
-export default async function DashboardPage() {
-  const report = await getDashboardReport();
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<ListSearchParams> }) {
+  const report = await getCachedDashboardReport(parsePagination(await searchParams, "profit"));
 
   return (
     <>
@@ -23,7 +24,7 @@ export default async function DashboardPage() {
         <StatCard label="Odenmemis fatura" value={String(report.unpaidInvoices)} icon={FileWarning} tone="orange" />
       </div>
       <div className="grid gap-4 px-4 pb-4">
-        <DashboardCharts data={report.chartData} />
+        <DashboardChartsLazy data={report.chartData} />
         <section className="space-y-3">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -35,7 +36,7 @@ export default async function DashboardPage() {
               <p className="text-xl font-bold text-brand">{formatMoney(report.expectedProfitTotal)}</p>
             </div>
           </div>
-          <DashboardExpectedProfitTable rows={report.expectedProfitRows} />
+          <DashboardExpectedProfitTable rows={report.expectedProfitRows} pagination={report.expectedProfitPagination} />
         </section>
         <div className="grid gap-4 xl:grid-cols-2">
           <DashboardRecentSalesTable rows={report.recentSales} />

@@ -1,25 +1,10 @@
 import { DataTable } from "@/components/tables/data-table";
 import { PageHeader } from "@/components/ui/page-header";
-import { formatNumber } from "@/lib/utils";
-import { listStockMovements } from "@/services/stock-service";
+import { getStockMovementsPage } from "@/services/list-page-service";
+import { parsePagination, type ListSearchParams } from "@/lib/pagination";
 
-const outboundTypes = ["SALE_OUT", "RETURN_OUT"];
-
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat("tr-TR").format(date);
-}
-
-export default async function StockMovementsPage() {
-  const movements = await listStockMovements();
-  const rows = movements.map((movement) => ({
-    id: movement.id,
-    product: movement.product.name,
-    type: movement.type,
-    quantity: `${outboundTypes.includes(movement.type) ? "-" : "+"}${formatNumber(Number(movement.quantity))} ${movement.product.unit}`,
-    reference: movement.reference ?? "-",
-    note: movement.note ?? "-",
-    date: formatDate(movement.movementAt)
-  }));
+export default async function StockMovementsPage({ searchParams }: { searchParams: Promise<ListSearchParams> }) {
+  const { rows, pagination } = await getStockMovementsPage(parsePagination(await searchParams));
 
   return (
     <>
@@ -27,6 +12,7 @@ export default async function StockMovementsPage() {
       <div className="p-4">
         <DataTable
           rows={rows}
+          pagination={pagination}
           columns={[
             { key: "date", header: "Tarih" },
             { key: "product", header: "Urun" },

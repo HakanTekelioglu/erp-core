@@ -255,6 +255,12 @@ npm test
 npm run build
 ```
 
+Performans çalışmasının ölçümleri, uygulanan değişiklikleri ve tekrar ölçme komutları için
+[performans sonuçları raporunu](docs/performance/performans-sonuclari-2026-10-09.md) inceleyin.
+Mevcut veritabanında sorgu ve liste doğrulaması için `npm run test:performance`;
+yerel sunucuda yanıt ölçümü için `npm run perf:http -- http://localhost:3000` kullanılabilir.
+HTTP ölçümü tarayıcı çizim süresini kapsamaz.
+
 ---
 
 <div align="center">

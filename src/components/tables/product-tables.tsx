@@ -9,12 +9,15 @@ import { DataTable } from "@/components/tables/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatMoney } from "@/lib/utils";
 
+import type { TablePagination } from "@/lib/pagination";
+
 type Row = Record<string, unknown>;
 
-export function ProductsTable({ rows }: { rows: Row[] }) {
+export function ProductsTable({ rows, pagination }: { rows: Row[]; pagination?: TablePagination }) {
   return (
     <DataTable
       rows={rows}
+      pagination={pagination}
       columns={[
         { key: "code", header: "Kod", render: (row) => <Link className="font-semibold text-brand" href={`/products/${row.id}`}>{String(row.code)}</Link> },
         { key: "name", header: "Urun" },
@@ -89,10 +92,11 @@ export function CategoriesTable({ rows }: { rows: Row[] }) {
   );
 }
 
-export function StockTable({ rows }: { rows: Row[] }) {
+export function StockTable({ rows, pagination }: { rows: Row[]; pagination?: TablePagination }) {
   return (
     <DataTable
       rows={rows}
+      pagination={pagination}
       columns={[
         { key: "code", header: "Kod" },
         { key: "name", header: "Urun" },

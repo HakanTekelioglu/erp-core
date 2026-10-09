@@ -1,6 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import type { ProductInput } from "@/lib/validations/product";
 
+export async function listProductOptions() {
+  return prisma.product.findMany({
+    where: { isActive: true },
+    select: { id: true, name: true, salePrice: true, purchasePrice: true, vatRate: true, unit: true, stockQuantity: true },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }]
+  });
+}
+
 export async function listProducts() {
   return prisma.product.findMany({
     include: {

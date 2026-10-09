@@ -5,12 +5,15 @@ import { DataTable } from "@/components/tables/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatMoney } from "@/lib/utils";
 
+import type { TablePagination } from "@/lib/pagination";
+
 type Row = Record<string, unknown>;
 
-export function SalesTable({ rows }: { rows: Row[] }) {
+export function SalesTable({ rows, pagination }: { rows: Row[]; pagination?: TablePagination }) {
   return (
     <DataTable
       rows={rows}
+      pagination={pagination}
       columns={[
         { key: "orderNumber", header: "Siparis", render: (row) => <Link className="font-semibold text-brand" href={`/sales/${row.id}`}>{String(row.orderNumber)}</Link> },
         { key: "customer", header: "Musteri" },
@@ -23,10 +26,11 @@ export function SalesTable({ rows }: { rows: Row[] }) {
   );
 }
 
-export function PurchasesTable({ rows }: { rows: Row[] }) {
+export function PurchasesTable({ rows, pagination }: { rows: Row[]; pagination?: TablePagination }) {
   return (
     <DataTable
       rows={rows}
+      pagination={pagination}
       columns={[
         { key: "orderNumber", header: "Siparis", render: (row) => <Link className="font-semibold text-brand" href={`/purchases/${row.id}`}>{String(row.orderNumber)}</Link> },
         { key: "supplier", header: "Tedarikci" },
@@ -39,10 +43,11 @@ export function PurchasesTable({ rows }: { rows: Row[] }) {
   );
 }
 
-export function InvoicesTable({ rows }: { rows: Row[] }) {
+export function InvoicesTable({ rows, pagination }: { rows: Row[]; pagination?: TablePagination }) {
   return (
     <DataTable
       rows={rows}
+      pagination={pagination}
       columns={[
         { key: "invoiceNumber", header: "Fatura", render: (row) => <Link className="font-semibold text-brand" href={`/invoices/${row.id}`}>{String(row.invoiceNumber)}</Link> },
         { key: "type", header: "Tip" },
@@ -57,10 +62,11 @@ export function InvoicesTable({ rows }: { rows: Row[] }) {
   );
 }
 
-export function PaymentsTable({ rows }: { rows: Row[] }) {
+export function PaymentsTable({ rows, pagination }: { rows: Row[]; pagination?: TablePagination }) {
   return (
     <DataTable
       rows={rows}
+      pagination={pagination}
       columns={[
         { key: "invoiceNumber", header: "Fatura" },
         { key: "party", header: "Cari" },
@@ -73,10 +79,11 @@ export function PaymentsTable({ rows }: { rows: Row[] }) {
   );
 }
 
-export function ExpensesTable({ rows }: { rows: Row[] }) {
+export function ExpensesTable({ rows, pagination }: { rows: Row[]; pagination?: TablePagination }) {
   return (
     <DataTable
       rows={rows}
+      pagination={pagination}
       columns={[
         { key: "title", header: "Gider" },
         { key: "category", header: "Kategori" },

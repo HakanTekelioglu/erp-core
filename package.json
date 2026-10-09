@@ -8,6 +8,9 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "tsx --test src/domain/orders/order-totals.test.ts",
+    "test:performance": "node --conditions=react-server --require ./scripts/server-only-register.cjs --import tsx --test scripts/verify-performance.ts",
+    "perf:http": "node scripts/benchmark-http.cjs",
+    "perf:services": "node --conditions=react-server --require ./scripts/server-only-register.cjs --import tsx scripts/benchmark-services.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts"
