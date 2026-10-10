@@ -1,6 +1,6 @@
 "use client";
 
-import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 type DashboardChartPoint = {
   month: string;
@@ -11,7 +11,7 @@ type DashboardChartPoint = {
 
 const chartColors = {
   axis: "rgb(var(--color-muted))",
-  grid: "rgb(var(--color-border) / 0.55)",
+  grid: "rgb(var(--color-border) / 0.7)",
   panel: "rgb(var(--color-panel))",
   ink: "rgb(var(--color-ink))",
   border: "rgb(var(--color-border))",
@@ -28,39 +28,111 @@ const axisStyle = {
 const tooltipStyle = {
   backgroundColor: chartColors.panel,
   border: `1px solid ${chartColors.border}`,
-  borderRadius: 8,
+  borderRadius: 10,
   color: chartColors.ink,
-  boxShadow: "0 12px 28px rgb(2 6 23 / 0.18)"
+  fontSize: 12,
+  padding: "8px 12px",
+  boxShadow: "0 12px 32px -8px rgb(0 0 0 / 0.18)"
 };
+
+const seriesLabels: Record<string, string> = {
+  sales: "Satis",
+  income: "Gelir",
+  expense: "Gider"
+};
+
+function formatTooltipValue(value: unknown, name: unknown): [string, string] {
+  const numeric = typeof value === "number" ? value : Number(value);
+  const formatted = Number.isFinite(numeric)
+    ? numeric.toLocaleString("tr-TR", { maximumFractionDigits: 2 })
+    : String(value);
+  return [formatted, seriesLabels[String(name)] ?? String(name)];
+}
+
+function formatAxisValue(value: number) {
+  if (Math.abs(value) >= 1_000_000) return `${(value / 1_000_000).toLocaleString("tr-TR", { maximumFractionDigits: 1 })}M`;
+  if (Math.abs(value) >= 1_000) return `${(value / 1_000).toLocaleString("tr-TR", { maximumFractionDigits: 1 })}B`;
+  return String(value);
+}
+
+function LegendDot({ color, label }: { color: string; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted">
+      <span className="size-2 rounded-full" style={{ backgroundColor: color }} aria-hidden />
+      {label}
+    </span>
+  );
+}
 
 export function DashboardCharts({ data }: { data: DashboardChartPoint[] }) {
   return (
     <div className="grid gap-4 xl:grid-cols-2">
-      <section className="rounded-lg border border-border bg-white p-4 shadow-sm">
-        <h2 className="text-base font-semibold text-ink">Aylik satis grafigi</h2>
-        <div className="mt-4 h-72">
+      <section className="surface-card p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold text-ink">Aylik satis grafigi</h2>
+            <p className="mt-0.5 text-xs text-muted">Aylara gore toplam satis tutari</p>
+          </div>
+          <LegendDot color={chartColors.brand} label="Satis" />
+        </div>
+        <div className="mt-5 h-72">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
-              <XAxis dataKey="month" tick={axisStyle} axisLine={{ stroke: chartColors.border }} tickLine={{ stroke: chartColors.border }} />
-              <YAxis tick={axisStyle} axisLine={{ stroke: chartColors.border }} tickLine={{ stroke: chartColors.border }} />
-              <Tooltip contentStyle={tooltipStyle} labelStyle={{ color: chartColors.ink }} itemStyle={{ color: chartColors.ink }} />
-              <Line type="monotone" dataKey="sales" stroke={chartColors.brand} strokeWidth={3} dot={{ r: 4, fill: chartColors.panel, strokeWidth: 3 }} />
-            </LineChart>
+            <AreaChart data={data} margin={{ top: 4, right: 4, left: -12, bottom: 0 }}>
+              <defs>
+                <linearGradient id="salesAreaFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={chartColors.brand} stopOpacity={0.32} />
+                  <stop offset="100%" stopColor={chartColors.brand} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+              <XAxis dataKey="month" tick={axisStyle} axisLine={false} tickLine={false} tickMargin={10} />
+              <YAxis tick={axisStyle} axisLine={false} tickLine={false} tickFormatter={formatAxisValue} width={56} />
+              <Tooltip
+                contentStyle={tooltipStyle}
+                labelStyle={{ color: chartColors.ink, fontWeight: 600, marginBottom: 4 }}
+                itemStyle={{ color: chartColors.ink }}
+                cursor={{ stroke: chartColors.border, strokeWidth: 1 }}
+                formatter={formatTooltipValue}
+              />
+              <Area
+                type="monotone"
+                dataKey="sales"
+                stroke={chartColors.brand}
+                strokeWidth={2.5}
+                fill="url(#salesAreaFill)"
+                dot={false}
+                activeDot={{ r: 5, fill: chartColors.brand, stroke: chartColors.panel, strokeWidth: 2 }}
+              />
+            </AreaChart>
           </ResponsiveContainer>
         </div>
       </section>
-      <section className="rounded-lg border border-border bg-white p-4 shadow-sm">
-        <h2 className="text-base font-semibold text-ink">Gelir gider grafigi</h2>
-        <div className="mt-4 h-72">
+      <section className="surface-card p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold text-ink">Gelir gider grafigi</h2>
+            <p className="mt-0.5 text-xs text-muted">Aylik gelir ve gider karsilastirmasi</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <LegendDot color={chartColors.success} label="Gelir" />
+            <LegendDot color={chartColors.danger} label="Gider" />
+          </div>
+        </div>
+        <div className="mt-5 h-72">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
-              <XAxis dataKey="month" tick={axisStyle} axisLine={{ stroke: chartColors.border }} tickLine={{ stroke: chartColors.border }} />
-              <YAxis tick={axisStyle} axisLine={{ stroke: chartColors.border }} tickLine={{ stroke: chartColors.border }} />
-              <Tooltip contentStyle={tooltipStyle} labelStyle={{ color: chartColors.ink }} itemStyle={{ color: chartColors.ink }} />
-              <Bar dataKey="income" fill={chartColors.success} radius={[4, 4, 0, 0]} />
-              <Bar dataKey="expense" fill={chartColors.danger} radius={[4, 4, 0, 0]} />
+            <BarChart data={data} margin={{ top: 4, right: 4, left: -12, bottom: 0 }} barGap={4}>
+              <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+              <XAxis dataKey="month" tick={axisStyle} axisLine={false} tickLine={false} tickMargin={10} />
+              <YAxis tick={axisStyle} axisLine={false} tickLine={false} tickFormatter={formatAxisValue} width={56} />
+              <Tooltip
+                contentStyle={tooltipStyle}
+                labelStyle={{ color: chartColors.ink, fontWeight: 600, marginBottom: 4 }}
+                itemStyle={{ color: chartColors.ink }}
+                cursor={{ fill: "rgb(var(--color-border) / 0.35)" }}
+                formatter={formatTooltipValue}
+              />
+              <Bar dataKey="income" fill={chartColors.success} radius={[6, 6, 0, 0]} maxBarSize={28} />
+              <Bar dataKey="expense" fill={chartColors.danger} radius={[6, 6, 0, 0]} maxBarSize={28} />
             </BarChart>
           </ResponsiveContainer>
         </div>

@@ -32,7 +32,7 @@ export function CustomerForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 rounded-lg border border-border bg-white p-5 shadow-sm">
+    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 surface-card p-6">
       <div className="grid gap-4 lg:grid-cols-2">
         <Select label="Musteri tipi" {...register("type")} error={errors.type?.message}>
           <option value="INDIVIDUAL">Bireysel</option>

@@ -52,7 +52,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
           <h1 className="text-2xl font-bold text-ink">{invoice.invoiceNumber}</h1>
           <p className="mt-1 text-sm text-muted">Fatura cikti ozeti</p>
         </div>
-        <section className="rounded-lg border border-border bg-white p-5 shadow-sm">
+        <section className="surface-card p-6">
           <dl className="grid gap-3 text-sm">
             <div className="flex justify-between"><dt className="text-muted">Tip</dt><dd className="font-semibold">{formatInvoiceType(invoice.type)}</dd></div>
             <div className="flex justify-between"><dt className="text-muted">Cari</dt><dd className="font-semibold">{party}</dd></div>

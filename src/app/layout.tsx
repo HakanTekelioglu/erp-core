@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin", "latin-ext"],
+  display: "swap",
+  variable: "--font-sans"
+});
 
 export const metadata: Metadata = {
   title: "MiniERP",
@@ -21,13 +28,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   `;
 
   return (
-    <html lang="tr" suppressHydrationWarning>
+    <html lang="tr" className={inter.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body>
+      <body className="font-sans">
         {children}
-        <Toaster richColors position="top-right" />
+        <Toaster richColors position="top-right" toastOptions={{ className: "font-sans" }} />
       </body>
     </html>
   );

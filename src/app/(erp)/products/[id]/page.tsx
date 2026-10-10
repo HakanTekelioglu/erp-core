@@ -26,7 +26,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     <>
       <PageHeader title={product.name} description={`${product.code} kodlu urun detaylari, fiyatlari ve stok gecmisi.`} />
       <div className="grid gap-4 p-4 xl:grid-cols-[360px_1fr]">
-        <section className="rounded-lg border border-border bg-white p-5 shadow-sm">
+        <section className="surface-card p-6">
           <dl className="grid gap-3 text-sm">
             <div className="flex justify-between"><dt className="text-muted">Kategori</dt><dd className="font-semibold">{product.category.name}</dd></div>
             <div className="flex justify-between"><dt className="text-muted">Alis</dt><dd className="font-semibold">{formatMoney(Number(product.purchasePrice))}</dd></div>

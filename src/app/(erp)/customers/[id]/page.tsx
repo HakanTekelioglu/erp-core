@@ -49,7 +49,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
     <>
       <PageHeader title={customer.name} description="Musteri bakiyesi, satis gecmisi ve fatura durumu." />
       <div className="grid gap-4 p-4 xl:grid-cols-[360px_1fr]">
-        <section className="rounded-lg border border-border bg-white p-5 shadow-sm">
+        <section className="surface-card p-6">
           <dl className="grid gap-3 text-sm">
             <div className="flex justify-between"><dt className="text-muted">Tip</dt><dd className="font-semibold">{formatCustomerType(customer.type)}</dd></div>
             <div className="flex justify-between"><dt className="text-muted">Telefon</dt><dd className="font-semibold">{customer.phone ?? "-"}</dd></div>

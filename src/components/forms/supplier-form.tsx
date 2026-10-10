@@ -32,7 +32,7 @@ export function SupplierForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 rounded-lg border border-border bg-white p-5 shadow-sm">
+    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 surface-card p-6">
       <div className="grid gap-4 lg:grid-cols-2">
         <Input label="Firma adi" {...register("companyName")} error={errors.companyName?.message} />
         <Input label="Yetkili kisi" {...register("contactPerson")} error={errors.contactPerson?.message} />

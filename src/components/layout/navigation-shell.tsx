@@ -59,7 +59,7 @@ export function NavigationShell({
       {isMobileOpen ? (
         <button
           type="button"
-          className="fixed inset-0 z-30 bg-slate-950/45 backdrop-blur-[1px] md:hidden"
+          className="fixed inset-0 z-30 bg-zinc-950/40 backdrop-blur-sm md:hidden"
           onClick={() => setIsMobileOpen(false)}
           aria-label="Menüyü kapat"
         />
@@ -68,6 +68,7 @@ export function NavigationShell({
       <Sidebar
         role={role}
         companyName={companyName}
+        userName={userName}
         isCollapsed={isCollapsed}
         isMobileOpen={isMobileOpen}
         onToggleCollapsed={toggleCollapsed}
@@ -77,7 +78,7 @@ export function NavigationShell({
       <div
         className={cn(
           "transition-[padding] duration-300 ease-out",
-          isCollapsed ? "md:pl-20" : "md:pl-72"
+          isCollapsed ? "md:pl-[76px]" : "md:pl-64"
         )}
       >
         <ChatDockShell

@@ -32,7 +32,7 @@ export function UserForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 rounded-lg border border-border bg-white p-5 shadow-sm">
+    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 surface-card p-6">
       <div className="grid gap-4 lg:grid-cols-2">
         <Input label="Ad soyad" {...register("name")} error={errors.name?.message} />
         <Input label="E-posta" type="email" {...register("email")} error={errors.email?.message} />

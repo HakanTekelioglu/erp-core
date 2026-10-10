@@ -62,7 +62,7 @@ export function PurchaseOrderForm({ suppliers, products }: { suppliers: Purchase
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid min-w-0 gap-4">
-      <section className="order-overview-grid grid min-w-0 gap-4 rounded-lg border border-border bg-white p-5 shadow-sm">
+      <section className="order-overview-grid grid min-w-0 gap-4 surface-card p-6">
         <Select label="Tedarikci" {...register("supplierId")} error={errors.supplierId?.message}>
           <option value="">Tedarikci secin</option>
           {suppliers.map((supplier) => (
@@ -77,7 +77,7 @@ export function PurchaseOrderForm({ suppliers, products }: { suppliers: Purchase
         </Select>
       </section>
 
-      <section className="min-w-0 rounded-lg border border-border bg-white p-5 shadow-sm">
+      <section className="min-w-0 surface-card p-6">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-base font-semibold text-ink">Siparis kalemleri</h2>
           <Button type="button" variant="secondary" onClick={() => append({ productId: "", quantity: 1, unitPrice: 0, vatRate: 20 })}>
@@ -98,7 +98,7 @@ export function PurchaseOrderForm({ suppliers, products }: { suppliers: Purchase
             });
 
             return (
-              <div key={field.id} className="purchase-order-line-grid grid min-w-0 gap-3 rounded-md border border-border p-3">
+              <div key={field.id} className="purchase-order-line-grid grid min-w-0 gap-3 rounded-lg border border-border/80 bg-slate-50/50 p-4">
                 <Select label="Urun" {...productRegistration} error={errors.items?.[index]?.productId?.message}>
                   <option value="">Urun secin</option>
                   {products.map((product) => (

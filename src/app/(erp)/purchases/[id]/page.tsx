@@ -20,7 +20,7 @@ export default async function PurchaseDetailPage({ params }: { params: Promise<{
     <>
       <PageHeader title={purchase.orderNumber} description="Satin alma siparisi detaylari ve teslim alma sureci." />
       <div className="grid gap-4 p-4 xl:grid-cols-[360px_1fr]">
-        <section className="rounded-lg border border-border bg-white p-5 shadow-sm">
+        <section className="surface-card p-6">
           <dl className="grid gap-3 text-sm">
             <div className="flex justify-between"><dt className="text-muted">Tedarikci</dt><dd className="font-semibold">{purchase.supplier.companyName}</dd></div>
             <div className="flex justify-between"><dt className="text-muted">Tarih</dt><dd className="font-semibold">{formatDate(purchase.createdAt)}</dd></div>
@@ -33,7 +33,7 @@ export default async function PurchaseDetailPage({ params }: { params: Promise<{
           </dl>
           <PurchaseOrderActions id={purchase.id} status={purchase.status} hasInvoice={Boolean(purchase.invoice)} stockReceived={purchase.stockReceived} />
         </section>
-        <section className="rounded-lg border border-border bg-white p-5 shadow-sm">
+        <section className="surface-card p-6">
           <h2 className="text-base font-semibold text-ink">Siparis kalemleri</h2>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[640px] border-collapse text-left text-sm">

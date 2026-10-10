@@ -16,13 +16,13 @@ export function PageHeader({ title, description, action }: PageHeaderProps) {
   const Icon = action?.icon;
 
   return (
-    <div className="flex flex-col gap-4 border-b border-border bg-white px-5 py-4 md:flex-row md:items-center md:justify-between">
-      <div>
-        <h1 className="text-xl font-semibold tracking-normal text-ink">{title}</h1>
-        {description ? <p className="mt-1 max-w-3xl text-sm text-muted">{description}</p> : null}
+    <div className="flex animate-fade-in flex-col gap-4 px-4 pb-2 pt-6 md:flex-row md:items-end md:justify-between md:pt-8">
+      <div className="min-w-0">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">{title}</h1>
+        {description ? <p className="mt-1.5 max-w-3xl text-sm text-muted">{description}</p> : null}
       </div>
       {action ? (
-        <Link href={action.href}>
+        <Link href={action.href} className="shrink-0">
           <Button>
             {Icon ? <Icon className="size-4" aria-hidden /> : null}
             {action.label}

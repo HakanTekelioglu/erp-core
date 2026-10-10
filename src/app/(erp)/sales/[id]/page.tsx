@@ -20,7 +20,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
     <>
       <PageHeader title={sale.orderNumber} description="Satis siparisi detaylari, durum akisi ve fatura olusturma islemleri." />
       <div className="grid gap-4 p-4 xl:grid-cols-[360px_1fr]">
-        <section className="rounded-lg border border-border bg-white p-5 shadow-sm">
+        <section className="surface-card p-6">
           <dl className="grid gap-3 text-sm">
             <div className="flex justify-between"><dt className="text-muted">Musteri</dt><dd className="font-semibold">{sale.customer.name}</dd></div>
             <div className="flex justify-between"><dt className="text-muted">Tarih</dt><dd className="font-semibold">{formatDate(sale.createdAt)}</dd></div>
@@ -34,7 +34,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
           </dl>
           <SalesOrderActions id={sale.id} status={sale.status} hasInvoice={Boolean(sale.invoice)} stockPosted={sale.stockPosted} />
         </section>
-        <section className="rounded-lg border border-border bg-white p-5 shadow-sm">
+        <section className="surface-card p-6">
           <h2 className="text-base font-semibold text-ink">Siparis kalemleri</h2>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[720px] border-collapse text-left text-sm">

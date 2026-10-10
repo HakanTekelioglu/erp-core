@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 const storageKey = "mini-erp-theme";
 
@@ -34,15 +33,14 @@ export function ThemeToggle() {
   }
 
   return (
-    <Button
+    <button
       type="button"
-      variant="secondary"
-      className="size-10 p-0"
+      className="inline-flex size-9 items-center justify-center rounded-md text-muted transition-colors hover:bg-slate-100 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30"
       onClick={() => updateTheme(isDark ? "light" : "dark")}
       aria-label={isDark ? "Acik moda gec" : "Koyu moda gec"}
       title={isDark ? "Acik moda gec" : "Koyu moda gec"}
     >
-      {isDark ? <Sun className="size-4" aria-hidden /> : <Moon className="size-4" aria-hidden />}
-    </Button>
+      {isDark ? <Sun className="size-[18px]" aria-hidden /> : <Moon className="size-[18px]" aria-hidden />}
+    </button>
   );
 }

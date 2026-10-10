@@ -321,7 +321,7 @@ export function ChatDockPanel({ currentUser, isOpen, onClose, onUnreadChange }: 
             type="button"
             aria-label="Mesaj panelini kapat"
             onClick={() => setDockOpen(false)}
-            className="fixed inset-0 top-16 z-30 bg-slate-950/25 md:hidden"
+            className="fixed inset-0 top-16 z-30 bg-zinc-950/40 backdrop-blur-sm md:hidden"
           />
         ) : null}
 
@@ -727,7 +727,7 @@ function ConversationView({
                         className={cn(
                           "inline-block whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2.5 text-left text-xs leading-5 shadow-sm",
                           own
-                            ? "rounded-br-md bg-[#45658d] text-white"
+                            ? "rounded-br-md bg-brand text-brand-foreground"
                             : "rounded-bl-md border border-border/70 bg-panel/95 text-ink"
                         )}
                       >
@@ -779,7 +779,7 @@ function ConversationView({
         <button
           type="submit"
           disabled={!message.trim() || isPending || !selectedConversation}
-          className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#45658d] text-white shadow-sm transition hover:bg-[#385574] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand text-brand-foreground shadow-sm transition hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-50"
           aria-label="Mesaj gönder"
         >
           <Send className="size-3.5" />
@@ -825,7 +825,7 @@ function ChatDialog({
   onCreateChannel: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/45 p-4 backdrop-blur-sm">
       <div
         className="max-h-[88vh] w-full max-w-md overflow-y-auto rounded-xl border border-border bg-white shadow-2xl"
         role="dialog"

@@ -88,9 +88,9 @@ export function DataTable<T extends Record<string, unknown>>({
   const paginatedRows = pagination ? rows : filteredRows.slice((safePage - 1) * size, safePage * size);
 
   return (
-    <div aria-busy={isPending} className="min-w-0 rounded-lg border border-border bg-white shadow-sm">
-      <div className="flex flex-col gap-3 border-b border-border p-3 md:flex-row md:items-center md:justify-between">
-        <label className="relative block w-full md:max-w-sm">
+    <div aria-busy={isPending} className="surface-card min-w-0 overflow-hidden">
+      <div className="flex flex-col gap-3 border-b border-border px-4 py-3 md:flex-row md:items-center md:justify-between">
+        <label className="relative block w-full md:max-w-xs">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" aria-hidden />
           <input
             value={query}
@@ -101,17 +101,22 @@ export function DataTable<T extends Record<string, unknown>>({
             }}
             placeholder={searchPlaceholder}
             maxLength={pagination ? 120 : undefined}
-            className="min-h-10 w-full rounded-md border border-border bg-white pl-9 pr-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/15"
+            className="h-9 w-full rounded-md border border-border bg-white pl-9 pr-3 text-sm text-ink shadow-sm outline-none transition placeholder:text-muted/80 focus:border-brand/60 focus:ring-4 focus:ring-brand/10"
           />
         </label>
-        <span aria-live="polite" className="text-sm font-medium text-muted">{isPending ? "Yukleniyor..." : `${totalCount} kayit`}</span>
+        <span aria-live="polite" className="inline-flex items-center gap-2 text-xs font-medium text-muted">
+          {isPending ? (
+            <span className="size-3 animate-spin rounded-full border-2 border-brand/30 border-t-brand" aria-hidden />
+          ) : null}
+          {isPending ? "Yukleniyor..." : `${totalCount} kayit`}
+        </span>
       </div>
-      <div className="overflow-x-auto">
+      <div className={isPending ? "overflow-x-auto opacity-60 transition-opacity" : "overflow-x-auto transition-opacity"}>
         <table className="w-full min-w-[760px] border-collapse text-left text-sm">
-          <thead className="bg-slate-50 text-xs uppercase tracking-normal text-muted">
+          <thead className="bg-slate-50 text-xs text-muted">
             <tr>
               {columns.map((column) => (
-                <th key={String(column.key)} className="border-b border-border px-4 py-3 font-semibold">
+                <th key={String(column.key)} className="whitespace-nowrap border-b border-border px-4 py-2.5 font-medium">
                   {column.header}
                 </th>
               ))}
@@ -119,7 +124,7 @@ export function DataTable<T extends Record<string, unknown>>({
           </thead>
           <tbody>
             {paginatedRows.map((row, rowIndex) => (
-              <tr key={String(row.id ?? rowIndex)} className="border-b border-border last:border-0 hover:bg-slate-50/70">
+              <tr key={String(row.id ?? rowIndex)} className="border-b border-border/70 transition-colors last:border-0 hover:bg-slate-50/70">
                 {columns.map((column) => (
                   <td key={String(column.key)} className="px-4 py-3 align-middle text-ink">
                     {column.render ? column.render(row) : String(row[column.key] ?? "")}
@@ -127,18 +132,25 @@ export function DataTable<T extends Record<string, unknown>>({
                 ))}
               </tr>
             ))}
+            {paginatedRows.length === 0 ? (
+              <tr>
+                <td colSpan={columns.length} className="px-4 py-12 text-center text-sm text-muted">
+                  Kayit bulunamadi
+                </td>
+              </tr>
+            ) : null}
           </tbody>
         </table>
       </div>
-      <div className="flex items-center justify-between border-t border-border px-3 py-3">
-        <span className="text-sm text-muted">
-          Sayfa {safePage} / {totalPages}
+      <div className="flex items-center justify-between border-t border-border px-4 py-2.5">
+        <span className="text-xs font-medium text-muted">
+          Sayfa <span className="text-ink">{safePage}</span> / {totalPages}
         </span>
-        <div className="flex gap-2">
-          <Button variant="secondary" className="size-9 p-0" onClick={() => changePage(Math.max(1, safePage - 1))} disabled={safePage === 1 || isPending} aria-label="Onceki sayfa">
+        <div className="flex gap-1.5">
+          <Button variant="secondary" className="size-8 min-h-0 p-0" onClick={() => changePage(Math.max(1, safePage - 1))} disabled={safePage === 1 || isPending} aria-label="Onceki sayfa">
             <ChevronLeft className="size-4" />
           </Button>
-          <Button variant="secondary" className="size-9 p-0" onClick={() => changePage(Math.min(totalPages, safePage + 1))} disabled={safePage === totalPages || isPending} aria-label="Sonraki sayfa">
+          <Button variant="secondary" className="size-8 min-h-0 p-0" onClick={() => changePage(Math.min(totalPages, safePage + 1))} disabled={safePage === totalPages || isPending} aria-label="Sonraki sayfa">
             <ChevronRight className="size-4" />
           </Button>
         </div>

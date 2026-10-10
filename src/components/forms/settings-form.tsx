@@ -32,7 +32,7 @@ export function SettingsForm({ defaultValues }: { defaultValues: SettingsInput }
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid max-w-4xl gap-4 rounded-lg border border-border bg-white p-5 shadow-sm">
+    <form onSubmit={handleSubmit(onSubmit)} className="grid max-w-4xl gap-4 surface-card p-6">
       <div className="grid gap-4 lg:grid-cols-2">
         <Input label="Sirket adi" {...register("companyName")} error={errors.companyName?.message} />
         <Input label="Telefon" {...register("phone")} error={errors.phone?.message} />

@@ -57,7 +57,7 @@ export function PaymentForm({ invoices }: { invoices: PaymentFormInvoice[] }) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4 rounded-lg border border-border bg-white p-5 shadow-sm">
+    <form onSubmit={handleSubmit(onSubmit)} className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4 surface-card p-6">
       <Select className="min-w-0 w-full" label="Fatura" {...register("invoiceId")} error={errors.invoiceId?.message} disabled={invoices.length === 0}>
         {invoices.length === 0 ? <option value="">Odenecek fatura yok</option> : null}
         {invoices.map((invoice) => (
