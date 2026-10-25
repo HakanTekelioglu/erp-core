@@ -55,3 +55,7 @@ export async function createExpense(input: ExpenseInput, userId?: string) {
     }
   });
 }
+
+export async function deleteExpense(id: string) {
+  return prisma.expense.delete({ where: { id } });
+}

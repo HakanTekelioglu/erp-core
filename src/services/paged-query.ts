@@ -8,7 +8,7 @@ type Row = Record<string, unknown>;
 // Search mirrors DataTable's Turkish substring search across projected row values.
 export async function queryPage<T extends Row>(projection: Prisma.Sql, order: Prisma.Sql, request: PaginationRequest) {
   const where = request.query
-    ? Prisma.sql`WHERE lower(replace(replace((SELECT string_agg(value, ' ' ORDER BY position) FROM json_each_text(row_to_json(r)) WITH ORDINALITY AS field(key, value, position) WHERE key <> '_sortDate'), 'I', 'ı'), 'İ', 'i')) LIKE ${`%${escapeLike(request.query)}%`}`
+    ? Prisma.sql`WHERE lower(replace(replace((SELECT string_agg(value, ' ' ORDER BY position) FROM json_each_text(row_to_json(r)) WITH ORDINALITY AS field(key, value, position) WHERE key NOT IN ('_sortDate', '_source')), 'I', 'ı'), 'İ', 'i')) LIKE ${`%${escapeLike(request.query)}%`}`
     : Prisma.empty;
   const [count] = await prisma.$queryRaw<Array<{ count: number }>>(Prisma.sql`
     WITH rows AS (${projection}) SELECT count(*)::int AS count FROM rows r ${where}

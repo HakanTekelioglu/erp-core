@@ -101,10 +101,10 @@ export function getExpensesPage(request: PaginationRequest) {
   return queryPage(Prisma.sql`
     SELECT e.id, e.title, e.category, ${formattedDate(Prisma.sql`e."expenseDate"`)} AS date,
       CASE e.method WHEN 'CASH' THEN 'Nakit' WHEN 'CREDIT_CARD' THEN 'Kredi karti' ELSE 'Banka transferi' END AS method,
-      trim_scale(e.amount) AS amount, e."expenseDate" AS "_sortDate" FROM "Expense" e
+      trim_scale(e.amount) AS amount, e."expenseDate" AS "_sortDate", 'EXPENSE' AS "_source" FROM "Expense" e
     UNION ALL
     SELECT i.id, i."invoiceNumber" || ' - ' || coalesce(s."companyName", 'Satin alma faturasi'), 'Satin Alma',
-      ${formattedDate(Prisma.sql`i."invoiceDate"`)}, 'Fatura', trim_scale(i."grandTotal"), i."invoiceDate"
+      ${formattedDate(Prisma.sql`i."invoiceDate"`)}, 'Fatura', trim_scale(i."grandTotal"), i."invoiceDate", 'PURCHASE_INVOICE'
     FROM "Invoice" i LEFT JOIN "Supplier" s ON s.id = i."supplierId" WHERE i.type = 'PURCHASE' AND i.status <> 'CANCELLED'
   `, Prisma.sql`r."_sortDate" DESC, r.id DESC`, request);
 }

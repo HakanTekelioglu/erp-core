@@ -15,6 +15,10 @@ export function canCreateChatChannel(role: Role) {
   return role === "ADMIN" || role === "MANAGER";
 }
 
+export function canDeleteExpense(role: Role) {
+  return role === "ADMIN" || role === "MANAGER";
+}
+
 export function canAccessPath(role: Role, pathname: string) {
   const item = navigationItems
     .filter((entry) => pathname === entry.href || pathname.startsWith(`${entry.href}/`))

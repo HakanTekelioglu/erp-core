@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { DataTable } from "@/components/tables/data-table";
+import { deleteExpenseAction } from "@/app/(erp)/expenses/actions";
+import { DataTable, type DataTableColumn } from "@/components/tables/data-table";
+import { DeleteRowButton } from "@/components/tables/delete-row-button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatMoney } from "@/lib/utils";
 
@@ -79,18 +81,40 @@ export function PaymentsTable({ rows, pagination }: { rows: Row[]; pagination?: 
   );
 }
 
-export function ExpensesTable({ rows, pagination }: { rows: Row[]; pagination?: TablePagination }) {
+export function ExpensesTable({ rows, pagination, canDelete = false }: { rows: Row[]; pagination?: TablePagination; canDelete?: boolean }) {
+  const columns: DataTableColumn<Row>[] = [
+    { key: "title", header: "Gider" },
+    { key: "category", header: "Kategori" },
+    { key: "date", header: "Tarih" },
+    { key: "method", header: "Yontem" },
+    { key: "amount", header: "Tutar", render: (row) => formatMoney(Number(row.amount)) }
+  ];
+
+  if (canDelete) {
+    columns.push({
+      key: "actions",
+      header: "İşlem",
+      render: (row) => row._source === "EXPENSE" ? (
+        <DeleteRowButton
+          id={String(row.id)}
+          confirmMessage={`“${String(row.title)}” başlıklı ${formatMoney(Number(row.amount))} tutarındaki gideri kalıcı olarak silmek istiyor musunuz? Bu işlem geri alınamaz.`}
+          successMessage="Gider silindi"
+          errorMessage="Gider silinemedi. Yetkinizi kontrol edip listeyi yenileyerek tekrar deneyin."
+          action={deleteExpenseAction}
+        />
+      ) : row._source === "PURCHASE_INVOICE" ? (
+        <Link className="whitespace-nowrap text-sm font-medium text-brand hover:underline" href={`/invoices/${row.id}`}>
+          Faturaya git
+        </Link>
+      ) : null
+    });
+  }
+
   return (
     <DataTable
       rows={rows}
       pagination={pagination}
-      columns={[
-        { key: "title", header: "Gider" },
-        { key: "category", header: "Kategori" },
-        { key: "date", header: "Tarih" },
-        { key: "method", header: "Yontem" },
-        { key: "amount", header: "Tutar", render: (row) => formatMoney(Number(row.amount)) }
-      ]}
+      columns={columns}
       searchPlaceholder="Gider ara"
     />
   );

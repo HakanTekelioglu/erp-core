@@ -26,6 +26,9 @@ test('pagination bounds, Turkish substring search, literal wildcards, and stable
   assert.equal(parsePagination({ page: '-5' }).page, 1);
   assert.equal(parsePagination({ page: 'NaN' }).page, 1);
   assert.equal(parsePagination({ q: 'x'.repeat(300) }).query.length, 120);
+  const internalSource = Prisma.sql`SELECT 'fixture-1' AS id, 'Kargo' AS title, 'EXPENSE' AS "_source"`;
+  assert.equal((await queryPage(internalSource, Prisma.sql`r.id ASC`, parsePagination({ q: 'EXPENSE' }))).pagination.totalCount, 0);
+  assert.equal((await queryPage(internalSource, Prisma.sql`r.id ASC`, parsePagination({ q: 'Kargo' }))).pagination.totalCount, 1);
 });
 
 test('all sales pages return every existing order once with the original displayed values', async () => {
@@ -102,9 +105,9 @@ test('paged products, partners, invoices, payments, expenses and inventory prese
     { get: pages.getPaymentsPage, rows: payments.map(p => ({ id: p.id, invoiceNumber: p.invoice.invoiceNumber, party: p.invoice.supplier?.companyName ?? '-', date: date(p.paidAt), method: method(p.method), amount: Number(p.amount) })) },
     { get: pages.getStockMovementsPage, rows: movements.map(m => ({ id: m.id, product: m.product.name, type: m.type, quantity: `${['SALE_OUT', 'RETURN_OUT'].includes(m.type) ? '-' : '+'}${formatNumber(Number(m.quantity))} ${m.product.unit}`, reference: m.reference ?? '-', note: m.note ?? '-', date: date(m.movementAt) })) },
     { get: pages.getExpensesPage, rows: [
-      ...expenses.map(e => ({ id: e.id, title: e.title, category: e.category, date: date(e.expenseDate), method: method(e.method), amount: Number(e.amount), sortDate: e.expenseDate })),
-      ...invoices.filter(i => i.type === 'PURCHASE' && i.status !== 'CANCELLED').map(i => ({ id: i.id, title: `${i.invoiceNumber} - ${i.supplier?.companyName ?? 'Satin alma faturasi'}`, category: 'Satin Alma', date: date(i.invoiceDate), method: 'Fatura', amount: Number(i.grandTotal), sortDate: i.invoiceDate }))
-    ].sort((a, b) => b.sortDate.getTime() - a.sortDate.getTime() || b.id.localeCompare(a.id)).map(row => ({ id: row.id, title: row.title, category: row.category, date: row.date, method: row.method, amount: row.amount })) }
+      ...expenses.map(e => ({ id: e.id, title: e.title, category: e.category, date: date(e.expenseDate), method: method(e.method), amount: Number(e.amount), sortDate: e.expenseDate, _source: 'EXPENSE' })),
+      ...invoices.filter(i => i.type === 'PURCHASE' && i.status !== 'CANCELLED').map(i => ({ id: i.id, title: `${i.invoiceNumber} - ${i.supplier?.companyName ?? 'Satin alma faturasi'}`, category: 'Satin Alma', date: date(i.invoiceDate), method: 'Fatura', amount: Number(i.grandTotal), sortDate: i.invoiceDate, _source: 'PURCHASE_INVOICE' }))
+    ].sort((a, b) => b.sortDate.getTime() - a.sortDate.getTime() || b.id.localeCompare(a.id)).map(row => ({ id: row.id, title: row.title, category: row.category, date: row.date, method: row.method, amount: row.amount, _source: row._source })) }
   ];
   for (const item of cases) {
     const rows = [];
